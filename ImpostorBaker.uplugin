@@ -5,7 +5,7 @@
 	"FriendlyName": "ImpostorBaker",
 	"Description": "Generates a variety of Impostors for use as distant mesh LODs.",
 	"Category": "Other",
-	"CreatedBy": "Ryan Brucks",
+	"CreatedBy": "Ryan Brucks, updated by Erlandas Barauskas",
 	"CreatedByURL": "",
 	"DocsURL": "",
 	"MarketplaceURL": "",
@@ -13,10 +13,17 @@
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": false,
-	"Plugins": [                       
-		{                              
-		"Name": "BlueprintMaterialTextureNodes",    
-		"Enabled": true                
-		}                              
-	]                    
+	"Plugins": [
+		{
+			"Name": "BlueprintMaterialTextureNodes",
+			"Enabled": true
+		}
+	],
+	"Modules": [
+		{
+			"Name": "ImpostorBakerEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		}
+	]
 }
