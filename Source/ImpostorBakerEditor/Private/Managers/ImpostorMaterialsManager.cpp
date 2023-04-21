@@ -155,18 +155,32 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	const UImpostorComponentsManager* ComponentsManager = GetManager<UImpostorComponentsManager>();
 	const UImpostorBakerSettings* Settings = GetDefault<UImpostorBakerSettings>();
 
-	UMaterialInstanceConstantFactoryNew* Factory = NewObject<UMaterialInstanceConstantFactoryNew>();
-	Factory->InitialParent = ImpostorPreviewMaterial->GetMaterial();
+	const FString AssetName = ImpostorData->NewMaterialName;
+	const FString PackageName = ImpostorData->GetPackage(AssetName);
 
-	IAssetTools& AssetTools = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	UMaterialInstanceConstant* NewMaterial = Cast<UMaterialInstanceConstant>(AssetTools.CreateAsset(ImpostorData->NewMaterialName, ImpostorData->SaveLocation.Path, UMaterialInstanceConstant::StaticClass(), Factory));
-	if (!ensure(NewMaterial))
+	UMaterialInstanceConstant* NewMaterial = FindObject<UMaterialInstanceConstant>(CreatePackage(*PackageName), *AssetName);
+	if (!NewMaterial)
 	{
-		return nullptr;
-	}
+		UMaterialInstanceConstantFactoryNew* Factory = NewObject<UMaterialInstanceConstantFactoryNew>();
+		Factory->InitialParent = ImpostorPreviewMaterial->GetMaterial();
 
-	TArray<UObject*> ObjectsToSync{NewMaterial};
-	GEditor->SyncBrowserToObjects(ObjectsToSync);
+		IAssetTools& AssetTools = FModuleManager::Get().LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+		NewMaterial = Cast<UMaterialInstanceConstant>(AssetTools.CreateAsset(ImpostorData->NewMaterialName, ImpostorData->SaveLocation.Path, UMaterialInstanceConstant::StaticClass(), Factory));
+		if (!ensure(NewMaterial))
+		{
+			return nullptr;
+		}
+
+		TArray<UObject*> ObjectsToSync{NewMaterial};
+		GEditor->SyncBrowserToObjects(ObjectsToSync);
+	}
+	else
+	{
+		if (NewMaterial->Parent != ImpostorPreviewMaterial->Parent)
+		{
+			NewMaterial->Parent = ImpostorPreviewMaterial->Parent;
+		}
+	}
 
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewSpecular, ImpostorData->Specular);
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewRoughness, ImpostorData->Roughness);

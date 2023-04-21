@@ -33,6 +33,7 @@ public:
 	void Bake();
 	void ClearRenderTargets() const;
 	void CreateAssets() const;
+	void AddLOD();
 	void Cleanup();
 
 public:
@@ -72,7 +73,7 @@ public:
 	UPROPERTY(Transient)
 	USkyLightComponent* SkyLight;
 
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(VisibleAnywhere, Transient, Instanced)
 	TArray<UImpostorBaseManager*> Managers;
 
 private:

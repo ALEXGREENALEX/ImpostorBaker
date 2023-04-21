@@ -71,8 +71,19 @@ void UImpostorBakerManager::ClearRenderTargets() const
 void UImpostorBakerManager::CreateAssets() const
 {
 	const TMap<EImpostorBakeMapType, UTexture2D*> NewTextures = GetManager<UImpostorRenderTargetsManager>()->SaveTextures();
-	UMaterialInstanceConstant* NewMaterial = GetManager<UImpostorMaterialsManager>()->SaveMaterial(NewTextures);
-	GetManager<UImpostorProceduralMeshManager>()->SaveMesh(NewMaterial);
+	if (UMaterialInstanceConstant* NewMaterial = GetManager<UImpostorMaterialsManager>()->SaveMaterial(NewTextures))
+	{
+		GetManager<UImpostorProceduralMeshManager>()->SaveMesh(NewMaterial);
+	}
+}
+
+void UImpostorBakerManager::AddLOD()
+{
+	const TMap<EImpostorBakeMapType, UTexture2D*> NewTextures = GetManager<UImpostorRenderTargetsManager>()->SaveTextures();
+	if (UMaterialInstanceConstant* NewMaterial = GetManager<UImpostorMaterialsManager>()->SaveMaterial(NewTextures))
+	{
+		GetManager<UImpostorProceduralMeshManager>()->UpdateLOD(NewMaterial);
+	}
 }
 
 void UImpostorBakerManager::Cleanup()

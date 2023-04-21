@@ -8,6 +8,7 @@
 #include "ImpostorRenderTargetsManager.h"
 
 #include "MeshDescription.h"
+#include "AssetToolsModule.h"
 #include "MaterialInstanceDynamic.h"
 #include "ProceduralMeshComponent.h"
 #include "ProceduralMeshConversion.h"
@@ -39,16 +40,8 @@ void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMate
 		return;
 	}
 
-	FString PackageName;
-	FString AssetName;
-	ImpostorData->GetAssetPathName(ImpostorData->NewMeshName, PackageName, AssetName);
-
-	FMeshDescription MeshDescription = BuildMeshDescription(MeshComponent);
-
-	if (!ensure(MeshDescription.Polygons().Num() > 0))
-	{
-		return;
-	}
+	const FString AssetName = ImpostorData->NewMeshName;
+	const FString PackageName = ImpostorData->GetPackage(AssetName);
 
 	UPackage* Package = CreatePackage(*PackageName);
 	if (!ensure(Package))
@@ -56,7 +49,130 @@ void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMate
 		return;
 	}
 
-	UStaticMesh* NewMesh = NewObject<UStaticMesh>(Package, *AssetName, RF_Public | RF_Standalone);
+	UStaticMesh* NewMesh = FindObject<UStaticMesh>(Package, *AssetName);
+	if (NewMesh)
+	{
+		FMeshDescription MeshDescription = BuildMeshDescription(MeshComponent);
+
+		if (!ensure(MeshDescription.Polygons().Num() > 0))
+		{
+			return;
+		}
+
+		{
+			FStaticMeshSourceModel& SrcModel = NewMesh->GetSourceModel(0);
+			SrcModel.BuildSettings.bRecomputeNormals = false;
+			SrcModel.BuildSettings.bRecomputeTangents = false;
+			SrcModel.BuildSettings.bRemoveDegenerates = false;
+			SrcModel.BuildSettings.bUseHighPrecisionTangentBasis = false;
+			SrcModel.BuildSettings.bUseFullPrecisionUVs = false;
+			SrcModel.BuildSettings.bGenerateLightmapUVs = true;
+			SrcModel.BuildSettings.SrcLightmapIndex = 0;
+			SrcModel.BuildSettings.DstLightmapIndex = 1;
+			NewMesh->CreateMeshDescription(0, MoveTemp(MeshDescription));
+			NewMesh->CommitMeshDescription(0);
+		}
+
+		if (!MeshComponent->bUseComplexAsSimpleCollision)
+		{
+			UBodySetup* NewBodySetup = NewMesh->GetBodySetup();
+			NewBodySetup->BodySetupGuid = FGuid::NewGuid();
+			NewBodySetup->AggGeom.ConvexElems = MeshComponent->ProcMeshBodySetup->AggGeom.ConvexElems;
+			NewBodySetup->bGenerateMirroredCollision = false;
+			NewBodySetup->bDoubleSidedGeometry = true;
+			NewBodySetup->CollisionTraceFlag = CTF_UseDefault;
+			NewBodySetup->CreatePhysicsMeshes();
+		}
+
+		const int32 NumSections = NewMesh->GetNumSections(0);
+		for (int32 SectionIndex = 0; SectionIndex < NumSections; SectionIndex++)
+		{
+			FMeshSectionInfo SectionInfo = NewMesh->GetSectionInfoMap().Get(0, SectionIndex);
+			SectionInfo.bCastShadow = ImpostorData->bMeshCastShadow;
+			NewMesh->GetSectionInfoMap().Set(0, SectionIndex, SectionInfo);
+		}
+
+		NewMesh->Build(false);
+		return;
+	}
+
+	NewMesh = CreateMesh(NewMaterial, Package, AssetName);
+	if (!ensure(NewMesh))
+	{
+		return;
+	}
+
+	FAssetRegistryModule::AssetCreated(NewMesh);
+}
+
+void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMaterial) const
+{
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	UStaticMesh* Mesh = ImpostorData->ReferencedMesh;
+
+	FString AssetName = ImpostorData->NewMeshName;
+	FString PackageName = ImpostorData->GetPackage(AssetName);
+	AssetTools.CreateUniqueAssetName(PackageName, "", PackageName, AssetName);
+
+	const UStaticMesh* NewMesh = CreateMesh(NewMaterial, Mesh, AssetName);
+	if (!ensure(NewMesh))
+	{
+		return;
+	}
+
+	if (ImpostorData->TargetLOD >= Mesh->GetNumSourceModels())
+	{
+		FStaticMeshSourceModel& SrcModel = Mesh->AddSourceModel();
+		SrcModel.BuildSettings.bRecomputeNormals = false;
+		SrcModel.BuildSettings.bRecomputeTangents = false;
+		SrcModel.BuildSettings.bRemoveDegenerates = false;
+		SrcModel.BuildSettings.bUseHighPrecisionTangentBasis = false;
+		SrcModel.BuildSettings.bUseFullPrecisionUVs = false;
+		SrcModel.BuildSettings.bGenerateLightmapUVs = true;
+		SrcModel.BuildSettings.SrcLightmapIndex = 0;
+		SrcModel.BuildSettings.DstLightmapIndex = 1;
+	}
+
+	Mesh->SetCustomLOD(NewMesh, ImpostorData->TargetLOD, "");
+
+	int32 MaterialIndex = Mesh->GetMaterialIndex(*NewMaterial->GetName());
+	if (MaterialIndex == -1)
+	{
+		const FName SlotName = Mesh->AddMaterial(NewMaterial);
+		MaterialIndex = Mesh->GetMaterialIndex(SlotName);
+	}
+	else
+	{
+		Mesh->SetMaterial(MaterialIndex, NewMaterial);
+	}
+
+	const int32 NumSections = Mesh->GetNumSections(ImpostorData->TargetLOD);
+	for (int32 SectionIndex = 0; SectionIndex < NumSections; SectionIndex++)
+	{
+		FMeshSectionInfo SectionInfo = Mesh->GetSectionInfoMap().Get(ImpostorData->TargetLOD, SectionIndex);
+		SectionInfo.bCastShadow = ImpostorData->bMeshCastShadow;
+		SectionInfo.MaterialIndex = MaterialIndex;
+		Mesh->GetSectionInfoMap().Set(ImpostorData->TargetLOD, SectionIndex, SectionInfo);
+	}
+
+	Mesh->Build(false);
+	Mesh->PostEditChange();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstant* NewMaterial, UObject* TargetPacket, const FString& AssetName) const
+{
+	FMeshDescription MeshDescription = BuildMeshDescription(MeshComponent);
+
+	if (!ensure(MeshDescription.Polygons().Num() > 0))
+	{
+		return nullptr;
+	}
+
+	UStaticMesh* NewMesh = NewObject<UStaticMesh>(TargetPacket, *AssetName, RF_Public | RF_Standalone);
 	NewMesh->InitResources();
 
 	NewMesh->SetLightingGuid();
@@ -96,17 +212,21 @@ void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMate
 		}
 	}
 
+	const int32 NumSections = NewMesh->GetNumSections(0);
+	for (int32 SectionIndex = 0; SectionIndex < NumSections; SectionIndex++)
+	{
+		FMeshSectionInfo SectionInfo = NewMesh->GetSectionInfoMap().Get(0, SectionIndex);
+		SectionInfo.bCastShadow = ImpostorData->bMeshCastShadow;
+		NewMesh->GetSectionInfoMap().Set(0, SectionIndex, SectionInfo);
+	}
+
 	NewMesh->ImportVersion = LastVersion;
 
 	NewMesh->Build(false);
 	NewMesh->PostEditChange();
 
-	FAssetRegistryModule::AssetCreated(NewMesh);
+	return NewMesh;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 
 void UImpostorProceduralMeshManager::GenerateMeshData()
 {

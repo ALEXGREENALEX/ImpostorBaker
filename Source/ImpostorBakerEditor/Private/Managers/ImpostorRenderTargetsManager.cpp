@@ -263,11 +263,19 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 			continue;
 		}
 
-		FString PackageName;
-		FString AssetName;
-		ImpostorData->GetAssetPathName(ImpostorData->NewMeshName + "_" + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[TargetMap].ToString(), PackageName, AssetName);
+		FString AssetName = ImpostorData->NewMeshName + "_" + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[TargetMap].ToString();
+		FString PackageName = ImpostorData->GetPackage(AssetName);
 
-		UTexture2D* NewTexture = RenderTarget->ConstructTexture2D(CreatePackage(*PackageName), AssetName, RenderTarget->GetMaskedFlags() | RF_Public | RF_Standalone, CTF_Default | CTF_AllowMips, nullptr);
+		UTexture2D* NewTexture = FindObject<UTexture2D>(CreatePackage(*PackageName), *AssetName);
+		if (NewTexture)
+		{
+			RenderTarget->UpdateTexture2D(NewTexture, RenderTarget->GetTextureFormatForConversionToTexture2D(), CTF_Default | CTF_AllowMips, nullptr);
+		}
+		else
+		{
+			NewTexture = RenderTarget->ConstructTexture2D(CreatePackage(*PackageName), AssetName, RenderTarget->GetMaskedFlags() | RF_Public | RF_Standalone, CTF_Default | CTF_AllowMips, nullptr);
+		}
+
 		if (!ensure(NewTexture))
 		{
 			continue;

@@ -48,8 +48,10 @@ public:
 	//~ End UImpostorBaseManager Interface
 
 	void SaveMesh(UMaterialInstanceConstant* NewMaterial) const;
+	void UpdateLOD(UMaterialInstanceConstant* NewMaterial) const;
 
 private:
+	UStaticMesh* CreateMesh(UMaterialInstanceConstant* NewMaterial, UObject* TargetPacket, const FString& AssetName) const;
 	void GenerateMeshData();
 
 	TArray<FVector> GetNormalCards() const;

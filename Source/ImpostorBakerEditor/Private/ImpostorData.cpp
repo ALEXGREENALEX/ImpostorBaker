@@ -49,6 +49,10 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	{
 		UpdateMeshData(ReferencedMesh);
 	}
+	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, TargetLOD))
+	{
+		TargetLOD = FMath::Min(TargetLOD, ReferencedMesh->GetNumLODs());
+	}
 
 	if (const FSimpleMulticastDelegate* Delegate = OnPropertyInteractiveChange.Find(PropertyChangedEvent.GetMemberPropertyName()))
 	{
@@ -88,6 +92,8 @@ void UImpostorData::UpdateMeshData(const FAssetData& MeshAssetData)
 	NewMaterialName = "MI_" + AssetName + "_Impostor";
 	NewTextureName = "T_" + AssetName + "_Impostor";
 	NewMeshName = "SM_" + AssetName + "_Impostor";
+
+	TargetLOD = ReferencedMesh->GetNumLODs();
 }
 
 UMaterialInterface* UImpostorData::GetMaterial() const
@@ -101,10 +107,7 @@ UMaterialInterface* UImpostorData::GetMaterial() const
 	}
 }
 
-void UImpostorData::GetAssetPathName(const FString& AssetName, FString& OutPackageName, FString& OutAssetName)
+FString UImpostorData::GetPackage(const FString& AssetName)
 {
-	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-
-	const FString PackageName = FPaths::Combine(SaveLocation.Path, AssetName);
-	AssetTools.CreateUniqueAssetName(PackageName, "", OutPackageName, OutAssetName);
+	return FPaths::Combine(SaveLocation.Path, AssetName);
 }

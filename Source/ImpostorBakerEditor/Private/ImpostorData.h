@@ -52,7 +52,7 @@ public:
 	void UpdateMeshData(const FAssetData& MeshAssetData);
 	UMaterialInterface* GetMaterial() const;
 
-	void GetAssetPathName(const FString& AssetName, FString& OutPackageName, FString& OutAssetName);
+	FString GetPackage(const FString& AssetName);
 
 public:
 	FSimpleDelegate OnSettingsChange;
@@ -77,6 +77,15 @@ public:
 	// This will be the name of the newly created Mesh
 	UPROPERTY(EditAnywhere, Category = "Saving")
 	FString NewMeshName;
+
+	// The LOD to which impostor will be saved.
+	// If selected LOD exists, it will be overwritten.
+	UPROPERTY(EditAnywhere, Category = "Saving")
+	int32 TargetLOD = 0;
+
+	// When mesh will be saved, will it cast shadow or not.
+	UPROPERTY(EditAnywhere, Category = "Saving")
+	bool bMeshCastShadow = false;
 
 	UPROPERTY(EditAnywhere, Category = "Default")
 	UStaticMesh* ReferencedMesh;
