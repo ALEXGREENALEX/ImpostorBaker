@@ -45,6 +45,7 @@ public:
 	{
 		return FPrimaryAssetId(PrimaryAssetType, GetFName());
 	}
+	virtual void PreEditChange(FProperty* PropertyAboutToChange) override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	//~ End UObject Interface
 
@@ -250,4 +251,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = "Advanced", AdvancedDisplay)
 	int32 DFMipTarget = 8;
+
+private:
+	bool bNeedUpdateCustomLightingBool = false;
 };

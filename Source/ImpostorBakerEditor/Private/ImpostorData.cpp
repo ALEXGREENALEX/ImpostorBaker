@@ -1,12 +1,38 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorData.h"
-#include "AssetToolsModule.h"
 #include "ImpostorBakerSettings.h"
+
+void UImpostorData::PreEditChange(FProperty* PropertyAboutToChange)
+{
+	Super::PreEditChange(PropertyAboutToChange);
+
+	if (PropertyAboutToChange->GetFName() == GET_MEMBER_NAME_CHECKED(UImpostorData, MapsToRender))
+	{
+		bNeedUpdateCustomLightingBool = false;
+
+		if (bCombineLightingAndColor)
+		{
+			if (MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
+				MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
+			{
+				bNeedUpdateCustomLightingBool = true;			
+			}
+		}
+		else
+		{
+			if (!MapsToRender.Contains(EImpostorBakeMapType::BaseColor) ||
+				!MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
+			{
+				bNeedUpdateCustomLightingBool = true;			
+			}
+		}
+	}
+}
 
 void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	UObject::PostEditChangeProperty(PropertyChangedEvent);
+	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	if (PropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive)
 	{
@@ -41,6 +67,27 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 				{
 					MapsToRender.Add(Enum);
 					break;
+				}
+			}
+		}
+
+		if (bNeedUpdateCustomLightingBool)
+		{
+			bNeedUpdateCustomLightingBool = false;
+			if (bCombineLightingAndColor)
+			{
+				if (!MapsToRender.Contains(EImpostorBakeMapType::BaseColor) ||
+					!MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
+				{
+					bCombineLightingAndColor = false;
+				}
+			}
+			else
+			{
+				if (MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
+					MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
+				{
+					bCombineLightingAndColor = true;
 				}
 			}
 		}

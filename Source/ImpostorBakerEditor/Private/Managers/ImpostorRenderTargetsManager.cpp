@@ -28,6 +28,17 @@ void UImpostorRenderTargetsManager::Update()
 	FillMapsToSave();
 
 	SceneCaptureSetup();
+
+	if (ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
+		ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::CustomLighting) &&
+		!ImpostorData->bCombineLightingAndColor)
+	{
+		SetOverlayText("CombineBaseColorLighting", "<TextBlock.ShadowedText>For</><TextBlock.ShadowedTextWarning> CustomLighting </><TextBlock.ShadowedText>to affect</><TextBlock.ShadowedTextWarning> BaseColor </><TextBlock.ShadowedText>it is necessary to enable</><TextBlock.ShadowedTextWarning> Combine Lighting and Color </><TextBlock.ShadowedText>parameter</>");
+	}
+	else
+	{
+		SetOverlayText("CombineBaseColorLighting", "");
+	}
 }
 
 void UImpostorRenderTargetsManager::Tick()
@@ -86,7 +97,7 @@ void UImpostorRenderTargetsManager::AllocateRenderTargets()
 		case EImpostorBakeMapType::Opacity:
 		case EImpostorBakeMapType::Subsurface:
 		case EImpostorBakeMapType::Depth:
-		case EImpostorBakeMapType::CustomLighting: Format = RTF_R16f; break;
+		case EImpostorBakeMapType::CustomLighting: Format = RTF_R8; break;
 		}
 
 		UTextureRenderTarget2D* RenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(SceneWorld, ImpostorData->Resolution, ImpostorData->Resolution, Format);
