@@ -469,4 +469,17 @@ void UImpostorRenderTargetsManager::CustomCompositing() const
 			UKismetRenderingLibrary::DrawMaterialToRenderTarget(SceneWorld, RenderTarget, GetManager<UImpostorMaterialsManager>()->BaseColorCustomLightingMaterial);
 		}
 	}
+
+	if (ImpostorData->bConvertDepthToAlpha &&
+		ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
+		ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
+	{
+		UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, ScratchRenderTarget, FLinearColor::Black);
+		if (UTextureRenderTarget2D* RenderTarget = TargetMaps.FindRef(EImpostorBakeMapType::BaseColor))
+		{
+			ResampleRenderTarget(RenderTarget, ScratchRenderTarget);
+			UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, RenderTarget, FLinearColor::Black);
+			UKismetRenderingLibrary::DrawMaterialToRenderTarget(SceneWorld, RenderTarget, GetManager<UImpostorMaterialsManager>()->ConvertDepthToAlphaMaterial);
+		}
+	}
 }

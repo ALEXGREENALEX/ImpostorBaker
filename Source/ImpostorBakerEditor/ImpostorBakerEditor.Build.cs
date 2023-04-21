@@ -23,6 +23,7 @@ public class ImpostorBakerEditor : ModuleRules
                 "UnrealEd",
                 "MeshDescription",
                 "DeveloperSettings",
+                "CommonMenuExtensions",
                 "AdvancedPreviewScene",
                 "ProceduralMeshComponent",
                 "BlueprintMaterialTextureNodes",

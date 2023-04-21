@@ -34,6 +34,9 @@ void UImpostorMaterialsManager::Initialize()
 	ResampleMaterial = UMaterialInstanceDynamic::Create(Settings->ResampleMaterial.LoadSynchronous(), nullptr);
 	check(ResampleMaterial);
 
+	ConvertDepthToAlphaMaterial = UMaterialInstanceDynamic::Create(Settings->ConvertDepthToAlpha.LoadSynchronous(), nullptr);
+	check(ConvertDepthToAlphaMaterial);
+
 	if (const TSoftObjectPtr<UMaterialInterface>* WeakDepthMaterial = GetDefault<UImpostorBakerSettings>()->BufferPostProcessMaterials.Find(EImpostorBakeMapType::Depth))
 	{
 		if (!WeakDepthMaterial->IsNull())
@@ -99,6 +102,7 @@ void UImpostorMaterialsManager::Update()
 	UpdateBaseColorCustomLightingMaterial();
 	UpdateCombinedNormalsDepthMaterial();
 	UpdateDepthMaterial();
+	UpdateConvertDepthToAlphaMaterial();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -340,4 +344,23 @@ void UImpostorMaterialsManager::UpdateDepthMaterial() const
 	}
 
 	DepthMaterial->SetScalarParameterValue(FName("Radius"), GetManager<UImpostorComponentsManager>()->ReferencedMeshComponent->Bounds.SphereRadius * 2.f);
+}
+
+void UImpostorMaterialsManager::UpdateConvertDepthToAlphaMaterial() const
+{
+	const UImpostorBakerSettings* Settings = GetDefault<UImpostorBakerSettings>();
+	const UImpostorRenderTargetsManager* RenderTargetsManager = GetManager<UImpostorRenderTargetsManager>();
+
+	ConvertDepthToAlphaMaterial->SetTextureParameterValue(Settings->ConvertDepthToAlphaBaseColorTexture, RenderTargetsManager->ScratchRenderTarget);
+
+	if (UTextureRenderTarget2D* RenderTarget = RenderTargetsManager->TargetMaps.FindRef(EImpostorBakeMapType::Depth))
+	{
+		ConvertDepthToAlphaMaterial->SetTextureParameterValue(Settings->ConvertDepthToAlphaDepthTexture, RenderTarget);
+	}
+	else
+	{
+		ConvertDepthToAlphaMaterial->SetTextureParameterValue(Settings->ConvertDepthToAlphaDepthTexture, LoadObject<UTexture2D>(nullptr, TEXT("/Engine/ArtTools/RenderToTexture/Textures/127grey.127grey")));
+	}
+
+	ConvertDepthToAlphaMaterial->SetScalarParameterValue(Settings->ConvertDepthToAlphaOffset, ImpostorData->DepthOffsetForOpacity);
 }

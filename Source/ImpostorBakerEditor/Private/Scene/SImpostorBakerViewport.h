@@ -60,6 +60,7 @@ protected:
 	virtual TSharedPtr<SWidget> MakeViewportToolbar() override;
 	virtual void PopulateViewportOverlays(TSharedRef<SOverlay> Overlay) override;
 	virtual bool IsVisible() const override;
+	virtual void BindCommands() override;
 	//~ End SEditorViewport Interface
 
 private:

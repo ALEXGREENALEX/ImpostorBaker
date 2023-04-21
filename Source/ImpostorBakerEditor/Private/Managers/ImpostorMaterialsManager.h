@@ -34,6 +34,7 @@ private:
 	void UpdateBaseColorCustomLightingMaterial() const;
 	void UpdateCombinedNormalsDepthMaterial() const;
 	void UpdateDepthMaterial() const;
+	void UpdateConvertDepthToAlphaMaterial() const;
 
 public:
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
@@ -59,4 +60,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
 	UMaterialInstanceDynamic* DepthMaterial;
+
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
+	UMaterialInstanceDynamic* ConvertDepthToAlphaMaterial;
 };

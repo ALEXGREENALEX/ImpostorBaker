@@ -5,9 +5,11 @@
 #include "ImpostorData.h"
 #include "ImpostorBakerViewportClient.h"
 #include "Managers/ImpostorBakerManager.h"
+#include "SImpostorBakerViewportToolBar.h"
 
 #include "AdvancedPreviewScene.h"
 #include "Widgets/Text/SRichTextBlock.h"
+#include "BufferVisualizationMenuCommands.h"
 #include "Components/DirectionalLightComponent.h"
 
 void SImpostorBakerViewport::Construct(const FArguments& InArgs)
@@ -106,7 +108,7 @@ TSharedRef<FEditorViewportClient> SImpostorBakerViewport::MakeEditorViewportClie
 
 TSharedPtr<SWidget> SImpostorBakerViewport::MakeViewportToolbar()
 {
-	return SNew(SCommonEditorViewportToolbarBase, SharedThis(this));
+	return SNew(SImpostorBakerViewportToolBar, SharedThis(this));
 }
 
 void SImpostorBakerViewport::PopulateViewportOverlays(const TSharedRef<SOverlay> Overlay)
@@ -132,6 +134,13 @@ bool SImpostorBakerViewport::IsVisible() const
 	return
 		SEditorViewport::IsVisible() ||
 		bIsTickForced;
+}
+
+void SImpostorBakerViewport::BindCommands()
+{
+	SEditorViewport::BindCommands();
+
+	FBufferVisualizationMenuCommands::Get().BindCommands(*CommandList, Client);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -111,6 +111,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Default")
 	bool bUseDistanceFieldAlpha = true;
 
+	// Converts depth values to opacity for base color texture.
+	UPROPERTY(EditAnywhere, Category = "Default")
+	bool bConvertDepthToAlpha = false;
+
+	// Offset when converting depth to opacity.
+	UPROPERTY(EditAnywhere, Category = "Default", meta = (EditCondition = "bConvertDepthToAlpha", EditConditionHides))
+	float DepthOffsetForOpacity = 0.f;
+
 	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
 	float DirectionalLightBrightness = 3.14;
 
@@ -235,7 +243,7 @@ public:
 
 	// Optionally disable mesh cutouts. Useful for debugging, such as to see the whole debug triangle view.
 	UPROPERTY(EditAnywhere, Category = "Advanced")
-	bool bUseMeshCutout = true;
+	bool bUseMeshCutout = false;
 
 	UPROPERTY(EditAnywhere, Category = "Advanced")
 	TArray<FVector> ManualPoints;

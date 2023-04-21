@@ -59,6 +59,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
 	TSoftObjectPtr<UMaterialInterface> ResampleMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_Resample_RT.M_Resample_RT"));
 
+	UPROPERTY(Config, EditAnywhere, Category = "Materials")
+	TSoftObjectPtr<UMaterialInterface> ConvertDepthToAlpha = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_ConvertDepthToAlpha.M_ConvertDepthToAlpha"));
+
 	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Impostor Preview")
 	FName ImpostorPreviewSpecular = "Specular";
 
@@ -152,4 +155,13 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Resample")
 	FName ResampleRenderTarget = "RT";
+
+	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Convert Depth to Alpha")
+	FName ConvertDepthToAlphaBaseColorTexture = "BaseColor";
+
+	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Convert Depth to Alpha")
+	FName ConvertDepthToAlphaDepthTexture = "Depth";
+
+	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Convert Depth to Alpha")
+	FName ConvertDepthToAlphaOffset = "Offset";
 };
