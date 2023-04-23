@@ -103,7 +103,7 @@ protected:
 		GetTypedOuter<UImpostorBakerManager>()->SetOverlayText(Section, Text);
 	}
 
-protected:
+public:
 	static void StartSlowTask(int32 AmountOfWork, const FString& DefaultMessage);
 	static void ProgressSlowTask(const FString& Message, bool bForceUpdate);
 	static void EndSlowTask();

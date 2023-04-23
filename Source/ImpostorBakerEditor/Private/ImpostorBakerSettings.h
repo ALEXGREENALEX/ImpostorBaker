@@ -27,7 +27,6 @@ public:
 		{EImpostorBakeMapType::Specular, TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/Engine/BufferVisualization/Specular.Specular"))},
 		{EImpostorBakeMapType::Roughness, TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/Engine/BufferVisualization/Roughness.Roughness"))},
 		{EImpostorBakeMapType::Opacity, TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/Engine/BufferVisualization/Opacity.Opacity"))},
-		{EImpostorBakeMapType::WorldNormal, TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/Engine/BufferVisualization/WorldNormal.WorldNormal"))},
 		{EImpostorBakeMapType::Subsurface, TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/Engine/BufferVisualization/SubsurfaceColor.SubsurfaceColor"))},
 		{EImpostorBakeMapType::Depth, TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/PostProcess/M_ObjectDepth.M_ObjectDepth"))},
 	};
@@ -48,10 +47,10 @@ public:
 	TSoftObjectPtr<UMaterialInterface> CombinedNormalsDepthMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_CombineNormalsDepth.M_CombineNormalsDepth"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
-	TSoftObjectPtr<UMaterialInterface> SampleFrameMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_Sample_Frame.M_Sample_Frame"));
+	TSoftObjectPtr<UMaterialInterface> SampleFrameMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/MI_Sample_Frame.MI_Sample_Frame"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
-	TSoftObjectPtr<UMaterialInterface> SampleFrameDFAlphaMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_Sample_Frame_DFAlpha.M_Sample_Frame_DFAlpha"));
+	TSoftObjectPtr<UMaterialInterface> SampleFrameDFAlphaMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/MI_SampleFrame_DistanceField.MI_SampleFrame_DistanceField"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
 	TSoftObjectPtr<UMaterialInterface> AddAlphasMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_AddAlpha.M_AddAlpha"));
@@ -60,7 +59,7 @@ public:
 	TSoftObjectPtr<UMaterialInterface> ResampleMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_Resample_RT.M_Resample_RT"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
-	TSoftObjectPtr<UMaterialInterface> ConvertDepthToAlpha = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_ConvertDepthToAlpha.M_ConvertDepthToAlpha"));
+	TSoftObjectPtr<UMaterialInterface> AddAlphaFromFinalColor = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_AddAlphaFromFinalColor.M_AddAlphaFromFinalColor"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Impostor Preview")
 	FName ImpostorPreviewSpecular = "Specular";
@@ -110,58 +109,4 @@ public:
 		{EImpostorBakeMapType::Depth, "Depth"},
 		{EImpostorBakeMapType::CustomLighting, "CustomLighting"},
 	};
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Sample Frame")
-	FName SampleFrameRenderTarget = "RT";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Sample Frame")
-	FName SampleFrameTextureSize = "TextureSize";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Sample Frame DF Alpha")
-	FName SampleFrameDFAlphaRenderTarget = "RT";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Sample Frame DF Alpha")
-	FName SampleFrameDFAlphaMipRenderTarget = "MipRT";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Sample Frame DF Alpha")
-	FName SampleFrameDFAlphaTextureSize = "TextureSize";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Add Alphas")
-	FName AddAlphasRenderTarget = "MipRT";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Base Color and Custom Lighting")
-	FName BaseColorCustomLightingBaseColorTexture = "BaseColor";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Base Color and Custom Lighting")
-	FName BaseColorCustomLightingCustomLightingTexture = "CustomLighting";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Base Color and Custom Lighting")
-	FName BaseColorCustomLightingPower = "CustomLightingPower";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Base Color and Custom Lighting")
-	FName BaseColorCustomLightingOpacity = "CustomLightingBaseColorOpacity";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Base Color and Custom Lighting")
-	FName BaseColorCustomLightingDesaturation = "Desaturation";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Base Color and Custom Lighting")
-	FName BaseColorCustomLightingMultiplier = "CustomLightingMultiplier";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Combined Normals and Depth")
-	FName CombinedNormalsDepthNormalTexture = "Normal";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Combined Normals and Depth")
-	FName CombinedNormalsDepthDepthTexture = "Depth";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Resample")
-	FName ResampleRenderTarget = "RT";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Convert Depth to Alpha")
-	FName ConvertDepthToAlphaBaseColorTexture = "BaseColor";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Convert Depth to Alpha")
-	FName ConvertDepthToAlphaDepthTexture = "Depth";
-
-	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Convert Depth to Alpha")
-	FName ConvertDepthToAlphaOffset = "Offset";
 };

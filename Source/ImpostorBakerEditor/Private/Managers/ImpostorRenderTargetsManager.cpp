@@ -54,6 +54,10 @@ void UImpostorRenderTargetsManager::Tick()
 	}
 
 	CaptureImposterGrid();
+	if (CurrentMap == EImpostorBakeMapType::BaseColor)
+	{
+		bCapturingFinalColor = true;
+	}
 
 	if (MapsToBake.Num() == 0)
 	{
@@ -89,8 +93,8 @@ void UImpostorRenderTargetsManager::AllocateRenderTargets()
 		switch (MapType)
 		{
 		default: check(false);
-		case EImpostorBakeMapType::BaseColor:
-		case EImpostorBakeMapType::WorldNormal: Format = RTF_RGBA16f; break;
+		case EImpostorBakeMapType::BaseColor: Format = RTF_RGBA8_SRGB; break;
+		case EImpostorBakeMapType::WorldNormal: Format = RTF_RGBA8; break;
 		case EImpostorBakeMapType::Metallic:
 		case EImpostorBakeMapType::Specular:
 		case EImpostorBakeMapType::Roughness:
@@ -151,6 +155,12 @@ void UImpostorRenderTargetsManager::CreateAlphasScratchRenderTargets()
 	{
 		ScratchRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(SceneWorld, ImpostorData->Resolution, ImpostorData->Resolution, RTF_RGBA16f);
 	}
+
+	if (!BaseColorScratchRenderTarget ||
+		BaseColorScratchRenderTarget->SizeX != ImpostorData->Resolution)
+	{
+		BaseColorScratchRenderTarget = UKismetRenderingLibrary::CreateRenderTarget2D(SceneWorld, ImpostorData->Resolution, ImpostorData->Resolution, RTF_RGBA16f);
+	}
 }
 
 void UImpostorRenderTargetsManager::FillMapsToSave()
@@ -189,7 +199,7 @@ void UImpostorRenderTargetsManager::SceneCaptureSetup() const
 	SceneCaptureComponent2D->CaptureSource = SCS_FinalColorHDR;
 	SceneCaptureComponent2D->ProjectionType = ImpostorData->ProjectionType;
 	SceneCaptureComponent2D->OrthoWidth = ComponentsManager->ObjectRadius * 2.f;
-	SceneCaptureComponent2D->FOVAngle = ((180.f / UE_DOUBLE_PI) * FMath::Atan(GetManager<UImpostorComponentsManager>()->ObjectRadius / ImpostorData->CameraDistance)) * 2.f;
+	SceneCaptureComponent2D->FOVAngle = ImpostorData->CameraFOV;
 	SceneCaptureComponent2D->bCaptureOnMovement = false;
 	SceneCaptureComponent2D->PrimitiveRenderMode = ESceneCapturePrimitiveRenderMode::PRM_UseShowOnlyList;
 	SceneCaptureComponent2D->PostProcessBlendWeight = 1.f;
@@ -203,6 +213,7 @@ void UImpostorRenderTargetsManager::ClearRenderTargets()
 {
 	UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, CombinedAlphasRenderTarget, FLinearColor::Black);
 	UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, ScratchRenderTarget, FLinearColor::Black);
+	UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, BaseColorScratchRenderTarget, FLinearColor::Black);
 
 	for (UTextureRenderTarget2D* MipRenderTarget : SceneCaptureMipChain)
 	{
@@ -224,7 +235,7 @@ void UImpostorRenderTargetsManager::ResampleRenderTarget(UTextureRenderTarget2D*
 {
 	const UImpostorMaterialsManager* MaterialsManager = GetManager<UImpostorMaterialsManager>();
 
-	MaterialsManager->ResampleMaterial->SetTextureParameterValue(GetDefault<UImpostorBakerSettings>()->ResampleRenderTarget, Source);
+	MaterialsManager->ResampleMaterial->SetTextureParameterValue(FName("RT"), Source);
 
 	UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, Dest, FLinearColor::Black);
 	UKismetRenderingLibrary::DrawMaterialToRenderTarget(SceneWorld, Dest, MaterialsManager->ResampleMaterial);
@@ -232,6 +243,8 @@ void UImpostorRenderTargetsManager::ResampleRenderTarget(UTextureRenderTarget2D*
 
 void UImpostorRenderTargetsManager::BakeRenderTargets()
 {
+	bCapturingFinalColor = false;
+
 	SceneCaptureComponent2D->TextureTarget = SceneCaptureMipChain[0];
 	ClearRenderTargets();
 
@@ -246,6 +259,13 @@ void UImpostorRenderTargetsManager::BakeRenderTargets()
 		{
 			MapsToBake.Add(MapType);
 		}
+	}
+
+	if (MapsToBake.Contains(EImpostorBakeMapType::BaseColor) &&
+		ImpostorData->ProjectionType == ECameraProjectionMode::Perspective &&
+		!ImpostorData->bUseFinalColorInsteadBaseColor)
+	{
+		MapsToBake.Add(EImpostorBakeMapType::BaseColor);
 	}
 
 	if (MapsToBake.Num() == 0)
@@ -267,6 +287,7 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 	TMap<EImpostorBakeMapType, UTexture2D*> NewTextures;
 	for (const EImpostorBakeMapType TargetMap : MapsToSave)
 	{
+		ProgressSlowTask("Creating " + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[TargetMap].ToString() + " texture...", true);
 		UTextureRenderTarget2D* RenderTarget = TargetMaps.FindRef(TargetMap);
 		if (!ensure(RenderTarget) ||
 			!ensure(RenderTarget->GetResource()))
@@ -277,6 +298,7 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 		FString AssetName = ImpostorData->NewMeshName + "_" + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[TargetMap].ToString();
 		FString PackageName = ImpostorData->GetPackage(AssetName);
 
+		bool bCreatingNewTexture = false;
 		UTexture2D* NewTexture = FindObject<UTexture2D>(CreatePackage(*PackageName), *AssetName);
 		if (NewTexture)
 		{
@@ -284,6 +306,7 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 		}
 		else
 		{
+			bCreatingNewTexture = true;
 			NewTexture = RenderTarget->ConstructTexture2D(CreatePackage(*PackageName), AssetName, RenderTarget->GetMaskedFlags() | RF_Public | RF_Standalone, CTF_Default | CTF_AllowMips, nullptr);
 		}
 
@@ -295,11 +318,15 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 		NewTexture->MarkPackageDirty();
 
 		NewTexture->CompressionSettings = TC_Default;
+		NewTexture->LODGroup = TargetMap == EImpostorBakeMapType::WorldNormal ? TEXTUREGROUP_WorldNormalMap : TEXTUREGROUP_World;
 		NewTexture->MipGenSettings = TMGS_FromTextureGroup;
-		NewTexture->SRGB = true;
+		NewTexture->SRGB = TargetMap == EImpostorBakeMapType::BaseColor;
 		NewTexture->PostEditChange();
 
-		FAssetRegistryModule::AssetCreated(NewTexture);
+		if (bCreatingNewTexture)
+		{
+			FAssetRegistryModule::AssetCreated(NewTexture);
+		}
 
 		NewTextures.Add(TargetMap, NewTexture);
 	}
@@ -318,7 +345,15 @@ void UImpostorRenderTargetsManager::PreparePostProcess(const EImpostorBakeMapTyp
 	default: check(false);
 	case EImpostorBakeMapType::BaseColor:
 	{
-		SceneCaptureComponent2D->CaptureSource = SCS_SceneColorHDR;
+		SceneCaptureComponent2D->CaptureSource = ImpostorData->bUseFinalColorInsteadBaseColor || ImpostorData->ProjectionType == ECameraProjectionMode::Orthographic || bCapturingFinalColor ? SCS_SceneColorHDR : SCS_BaseColor;
+		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array = {};
+		SceneCaptureComponent2D->SceneViewExtensions = {};
+		Extension = nullptr;
+		break;
+	}
+	case EImpostorBakeMapType::WorldNormal:
+	{
+		SceneCaptureComponent2D->CaptureSource = SCS_Normal;
 		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array = {};
 		SceneCaptureComponent2D->SceneViewExtensions = {};
 		Extension = nullptr;
@@ -336,7 +371,6 @@ void UImpostorRenderTargetsManager::PreparePostProcess(const EImpostorBakeMapTyp
 	case EImpostorBakeMapType::Specular:
 	case EImpostorBakeMapType::Roughness:
 	case EImpostorBakeMapType::Opacity:
-	case EImpostorBakeMapType::WorldNormal:
 	case EImpostorBakeMapType::Subsurface:
 	case EImpostorBakeMapType::Depth:
 	{
@@ -361,7 +395,16 @@ void UImpostorRenderTargetsManager::PreparePostProcess(const EImpostorBakeMapTyp
 
 void UImpostorRenderTargetsManager::CaptureImposterGrid()
 {
-	const FString Message = "Baking impostor " + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[CurrentMap].ToString() + " map... [" + LexToString(NumMapsToBake - MapsToBake.Num()) + " / " + LexToString(NumMapsToBake) + "]";
+	FString MapTypeString = GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[CurrentMap].ToString();
+	if (bCapturingFinalColor &&
+		CurrentMap == EImpostorBakeMapType::BaseColor)
+	{
+		MapTypeString = "Final Color (Opacity)";
+		ResampleRenderTarget(TargetMaps[CurrentMap], BaseColorScratchRenderTarget);
+		ClearRenderTarget(TargetMaps[CurrentMap]);
+	}
+
+	const FString Message = "Baking impostor " + MapTypeString + " map... [" + LexToString(NumMapsToBake - MapsToBake.Num()) + " / " + LexToString(NumMapsToBake) + "]";
 
 	const UImpostorComponentsManager* ComponentsManager = GetManager<UImpostorComponentsManager>();
 	const TArray<FVector>& ViewCaptureVectors = ComponentsManager->ViewCaptureVectors;
@@ -375,7 +418,7 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 		ProgressSlowTask(Message, Index % ForceEvery == 0);
 
 		FVector WorldLocation = ComponentsManager->ReferencedMeshComponent->Bounds.Origin;
-		WorldLocation += Vector * (ImpostorData->ProjectionType == ECameraProjectionMode::Type::Orthographic ? (ComponentsManager->ReferencedMeshComponent->Bounds.SphereRadius * 1.25f) : ImpostorData->CameraDistance);
+		WorldLocation += Vector * (ImpostorData->ProjectionType == ECameraProjectionMode::Type::Orthographic ? (ComponentsManager->ObjectRadius * 1.25f) : ImpostorData->CameraDistance);
 		SceneCaptureComponent2D->SetWorldLocation(WorldLocation);
 		SceneCaptureComponent2D->SetWorldRotation((Vector * -1.f).ToOrientationRotator());
 
@@ -388,10 +431,15 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 		if (ImpostorData->bUseDistanceFieldAlpha &&
 			CurrentMap == EImpostorBakeMapType::BaseColor)
 		{
-			for (int32 MipIndex = 1; MipIndex < SceneCaptureMipChain.Num(); MipIndex++)
+			if (bCapturingFinalColor ||
+				ImpostorData->ProjectionType == ECameraProjectionMode::Orthographic ||
+				ImpostorData->bUseFinalColorInsteadBaseColor)
 			{
-				UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, SceneCaptureMipChain[MipIndex], FLinearColor::Black);
-				ResampleRenderTarget(SceneCaptureMipChain[MipIndex - 1], SceneCaptureMipChain[MipIndex]);
+				for (int32 MipIndex = 1; MipIndex < SceneCaptureMipChain.Num(); MipIndex++)
+				{
+					UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, SceneCaptureMipChain[MipIndex], FLinearColor::Black);
+					ResampleRenderTarget(SceneCaptureMipChain[MipIndex - 1], SceneCaptureMipChain[MipIndex]);
+				}
 			}
 		}
 
@@ -444,6 +492,19 @@ void UImpostorRenderTargetsManager::FinalizeBaking()
 
 void UImpostorRenderTargetsManager::CustomCompositing() const
 {
+	if (ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
+		ImpostorData->ProjectionType == ECameraProjectionMode::Perspective &&
+		!ImpostorData->bUseFinalColorInsteadBaseColor)
+	{
+		UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, ScratchRenderTarget, FLinearColor::Black);
+		if (UTextureRenderTarget2D* RenderTarget = TargetMaps.FindRef(EImpostorBakeMapType::BaseColor))
+		{
+			ResampleRenderTarget(RenderTarget, ScratchRenderTarget);
+			UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, RenderTarget, FLinearColor::Black);
+			UKismetRenderingLibrary::DrawMaterialToRenderTarget(SceneWorld, RenderTarget, GetManager<UImpostorMaterialsManager>()->AddAlphaFromFinalColorMaterial);
+		}
+	}
+
 	if (ImpostorData->bCombineNormalAndDepth &&
 		ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::WorldNormal) &&
 		ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
@@ -467,19 +528,6 @@ void UImpostorRenderTargetsManager::CustomCompositing() const
 			ResampleRenderTarget(RenderTarget, ScratchRenderTarget);
 			UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, RenderTarget, FLinearColor::Black);
 			UKismetRenderingLibrary::DrawMaterialToRenderTarget(SceneWorld, RenderTarget, GetManager<UImpostorMaterialsManager>()->BaseColorCustomLightingMaterial);
-		}
-	}
-
-	if (ImpostorData->bConvertDepthToAlpha &&
-		ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
-		ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
-	{
-		UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, ScratchRenderTarget, FLinearColor::Black);
-		if (UTextureRenderTarget2D* RenderTarget = TargetMaps.FindRef(EImpostorBakeMapType::BaseColor))
-		{
-			ResampleRenderTarget(RenderTarget, ScratchRenderTarget);
-			UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, RenderTarget, FLinearColor::Black);
-			UKismetRenderingLibrary::DrawMaterialToRenderTarget(SceneWorld, RenderTarget, GetManager<UImpostorMaterialsManager>()->ConvertDepthToAlphaMaterial);
 		}
 	}
 }

@@ -100,6 +100,13 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	{
 		TargetLOD = FMath::Min(TargetLOD, ReferencedMesh->GetNumLODs());
 	}
+	else if (
+		PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, PerspectiveCameraType) ||
+		PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, CameraDistance) ||
+		PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, CameraFOV))
+	{
+		UpdateFOVDistance();
+	}
 
 	if (const FSimpleMulticastDelegate* Delegate = OnPropertyInteractiveChange.Find(PropertyChangedEvent.GetMemberPropertyName()))
 	{
@@ -141,6 +148,8 @@ void UImpostorData::UpdateMeshData(const FAssetData& MeshAssetData)
 	NewMeshName = "SM_" + AssetName + "_Impostor";
 
 	TargetLOD = ReferencedMesh->GetNumLODs();
+
+	UpdateFOVDistance();
 }
 
 UMaterialInterface* UImpostorData::GetMaterial() const
@@ -157,4 +166,24 @@ UMaterialInterface* UImpostorData::GetMaterial() const
 FString UImpostorData::GetPackage(const FString& AssetName)
 {
 	return FPaths::Combine(SaveLocation.Path, AssetName);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+void UImpostorData::UpdateFOVDistance()
+{
+	if (PerspectiveCameraType == EImpostorPerspectiveCameraType::Both)
+	{
+		return;
+	}
+
+	if (PerspectiveCameraType == EImpostorPerspectiveCameraType::Distance)
+	{
+		CameraFOV = ((180.f / UE_DOUBLE_PI) * FMath::Atan(ReferencedMesh->GetBounds().SphereRadius / CameraDistance)) * 2.f;
+		return;
+	}
+
+	CameraDistance = ReferencedMesh->GetBounds().SphereRadius / FMath::Tan(CameraFOV / 2.f / (180.f / UE_DOUBLE_PI));
 }

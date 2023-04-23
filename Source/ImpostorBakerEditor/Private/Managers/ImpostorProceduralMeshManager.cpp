@@ -35,6 +35,7 @@ void UImpostorProceduralMeshManager::Update()
 
 void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMaterial) const
 {
+	ProgressSlowTask("Creating impostor static mesh...", true);
 	if (!ensure(MeshComponent))
 	{
 		return;
@@ -107,6 +108,7 @@ void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMate
 
 void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMaterial) const
 {
+	ProgressSlowTask("Adding impostor mesh as a LOD" + LexToString(ImpostorData->TargetLOD) + " to referenced mesh...", true);
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	UStaticMesh* Mesh = ImpostorData->ReferencedMesh;
 

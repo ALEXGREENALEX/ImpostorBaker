@@ -92,6 +92,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
 	UTextureRenderTarget2D* ScratchRenderTarget;
 
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
+	UTextureRenderTarget2D* BaseColorScratchRenderTarget;
+
 private:
 	UPROPERTY(Transient)
 	TArray<EImpostorBakeMapType> MapsToBake;
@@ -100,4 +103,6 @@ private:
 	EImpostorBakeMapType CurrentMap = EImpostorBakeMapType::None;
 	TSharedPtr<FLightingViewExtension> Extension;
 	int32 FramesBeforeCapture = 0;
+
+	bool bCapturingFinalColor = false;
 };

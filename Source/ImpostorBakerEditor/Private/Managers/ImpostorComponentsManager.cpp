@@ -1,6 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorComponentsManager.h"
+#include "ImpostorData.h"
 #include "ImpostorBakerUtilities.h"
 #include "ImpostorLightingManager.h"
 
@@ -30,6 +31,7 @@ void UImpostorComponentsManager::Update()
 void UImpostorComponentsManager::UpdateComponentsData()
 {
 	ReferencedMeshComponent->SetStaticMesh(ImpostorData->ReferencedMesh);
+	ReferencedMeshComponent->SetForcedLodModel(0);
 	ReferencedMeshComponent->SetRelativeLocation(FVector(ReferencedMeshComponent->Bounds.SphereRadius * -2.25f, 0.f, 10.f));
 
 	ObjectRadius = ReferencedMeshComponent->Bounds.SphereRadius;

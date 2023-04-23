@@ -3,6 +3,7 @@
 #include "ImpostorDataThumbnailRenderer.h"
 #include "Managers/ImpostorBakerManager.h"
 #include "AssetTypeActions_ImpostorSettings.h"
+#include "Customizations/ImpostorDataCustomization.h"
 #include "Customizations/ImpostorBakerManagerCustomization.h"
 
 #include "AssetToolsModule.h"
@@ -30,6 +31,7 @@ void FImpostorBakerEditorModule::StartupModule()
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyModule.RegisterCustomClassLayout(UImpostorBakerManager::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FImpostorBakerManagerCustomization::MakeInstance));
+		PropertyModule.RegisterCustomClassLayout(UImpostorData::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FImpostorDataCustomization::MakeInstance));
 	}
 
 	UThumbnailManager::Get().RegisterCustomRenderer(UImpostorData::StaticClass(), UImpostorDataThumbnailRenderer::StaticClass());
@@ -59,6 +61,7 @@ void FImpostorBakerEditorModule::ShutdownModule()
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyModule.UnregisterCustomClassLayout(UImpostorBakerManager::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(UImpostorData::StaticClass()->GetFName());
 	}
 
 	if (UObjectInitialized())

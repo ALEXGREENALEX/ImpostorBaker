@@ -70,20 +70,24 @@ void UImpostorBakerManager::ClearRenderTargets() const
 
 void UImpostorBakerManager::CreateAssets() const
 {
+	UImpostorBaseManager::StartSlowTask(GetManager<UImpostorRenderTargetsManager>()->MapsToSave.Num() + 2, "Creating impostor mesh assets...");
 	const TMap<EImpostorBakeMapType, UTexture2D*> NewTextures = GetManager<UImpostorRenderTargetsManager>()->SaveTextures();
 	if (UMaterialInstanceConstant* NewMaterial = GetManager<UImpostorMaterialsManager>()->SaveMaterial(NewTextures))
 	{
 		GetManager<UImpostorProceduralMeshManager>()->SaveMesh(NewMaterial);
 	}
+	UImpostorBaseManager::EndSlowTask();
 }
 
 void UImpostorBakerManager::AddLOD()
 {
+	UImpostorBaseManager::StartSlowTask(GetManager<UImpostorRenderTargetsManager>()->MapsToSave.Num() + 2, "Adding impostor LOD to referenced mesh...");
 	const TMap<EImpostorBakeMapType, UTexture2D*> NewTextures = GetManager<UImpostorRenderTargetsManager>()->SaveTextures();
 	if (UMaterialInstanceConstant* NewMaterial = GetManager<UImpostorMaterialsManager>()->SaveMaterial(NewTextures))
 	{
 		GetManager<UImpostorProceduralMeshManager>()->UpdateLOD(NewMaterial);
 	}
+	UImpostorBaseManager::EndSlowTask();
 }
 
 void UImpostorBakerManager::Cleanup()

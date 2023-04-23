@@ -30,6 +30,14 @@ enum class EImpostorLayoutType
 	TraditionalBillboards UMETA(Tooltip = "Uses a 3x3 grid of tradtional billboards. 8 views are from the sides and 1 from above.")
 };
 
+UENUM()
+enum class EImpostorPerspectiveCameraType
+{
+	Distance UMETA(Tooltip = "Camera FOV will be calculated by the specified distance"),
+	FOV UMETA(Tooltip = "Camera distance will be calculated by the specified FOV"),
+	Both UMETA(Tooltip = "Camera distance and the FOV will be custom")
+};
+
 UCLASS()
 class UImpostorData : public UObject
 {
@@ -54,6 +62,9 @@ public:
 	UMaterialInterface* GetMaterial() const;
 
 	FString GetPackage(const FString& AssetName);
+
+private:
+	void UpdateFOVDistance();
 
 public:
 	FSimpleDelegate OnSettingsChange;
@@ -99,6 +110,10 @@ public:
 		EImpostorBakeMapType::WorldNormal
 	};
 
+	// Will use final color instead of base color
+	UPROPERTY(EditAnywhere, Category = "Default", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
+	bool bUseFinalColorInsteadBaseColor = false;
+
 	// Choose the type of impostor
 	UPROPERTY(EditAnywhere, Category = "Default")
 	EImpostorLayoutType ImpostorType = EImpostorLayoutType::UpperHemisphereOnly;
@@ -110,14 +125,6 @@ public:
 	// Allows higher quality silhouette blending as well as subsurface edge effects. Makes rendering take much longer.
 	UPROPERTY(EditAnywhere, Category = "Default")
 	bool bUseDistanceFieldAlpha = true;
-
-	// Converts depth values to opacity for base color texture.
-	UPROPERTY(EditAnywhere, Category = "Default")
-	bool bConvertDepthToAlpha = false;
-
-	// Offset when converting depth to opacity.
-	UPROPERTY(EditAnywhere, Category = "Default", meta = (EditCondition = "bConvertDepthToAlpha", EditConditionHides))
-	float DepthOffsetForOpacity = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
 	float DirectionalLightBrightness = 3.14;
@@ -219,11 +226,17 @@ public:
 
 	// Orthographic is the most accurate, but some shader effects require a perspective view. The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
 	UPROPERTY(EditAnywhere, Category = "Advanced")
-	TEnumAsByte<ECameraProjectionMode::Type> ProjectionType = ECameraProjectionMode::Type::Orthographic;
+	TEnumAsByte<ECameraProjectionMode::Type> ProjectionType = ECameraProjectionMode::Type::Perspective;
 
-	// Distance at which to capture for perspective (if orthographic is set to false). The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
-	UPROPERTY(EditAnywhere, Category = "Advanced")
+	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
+	EImpostorPerspectiveCameraType PerspectiveCameraType = EImpostorPerspectiveCameraType::FOV;
+
+	// Distance at which to capture. The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
+	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
 	float CameraDistance = 1000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
+	float CameraFOV = 20.f;
 
 	// Textures resolution
 	UPROPERTY(EditAnywhere, Category = "Advanced")
