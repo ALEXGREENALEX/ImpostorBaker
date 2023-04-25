@@ -137,13 +137,13 @@ UMaterialInterface* UImpostorMaterialsManager::GetRenderTypeMaterial(const EImpo
 	{
 	default: check(false);
 	case EImpostorBakeMapType::CustomLighting:
+	case EImpostorBakeMapType::WorldNormal:
 	case EImpostorBakeMapType::BaseColor: return nullptr;
 	case EImpostorBakeMapType::Depth: return DepthMaterial;
 	case EImpostorBakeMapType::Metallic:
 	case EImpostorBakeMapType::Specular:
 	case EImpostorBakeMapType::Roughness:
 	case EImpostorBakeMapType::Opacity:
-	case EImpostorBakeMapType::WorldNormal:
 	case EImpostorBakeMapType::Subsurface: return GetDefault<UImpostorBakerSettings>()->BufferPostProcessMaterials.FindRef(TargetMap).LoadSynchronous();
 	}
 }
@@ -154,13 +154,13 @@ bool UImpostorMaterialsManager::HasRenderTypeMaterial(const EImpostorBakeMapType
 	{
 	default: check(false);
 	case EImpostorBakeMapType::CustomLighting:
+	case EImpostorBakeMapType::WorldNormal:
 	case EImpostorBakeMapType::BaseColor: return true;
 	case EImpostorBakeMapType::Depth: return DepthMaterial != nullptr;
 	case EImpostorBakeMapType::Metallic:
 	case EImpostorBakeMapType::Specular:
 	case EImpostorBakeMapType::Roughness:
 	case EImpostorBakeMapType::Opacity:
-	case EImpostorBakeMapType::WorldNormal:
 	case EImpostorBakeMapType::Subsurface: return GetDefault<UImpostorBakerSettings>()->BufferPostProcessMaterials.FindRef(TargetMap).LoadSynchronous() != nullptr;
 	}
 }
@@ -309,7 +309,6 @@ void UImpostorMaterialsManager::UpdateAddAlphasMaterial() const
 
 void UImpostorMaterialsManager::UpdateBaseColorCustomLightingMaterial() const
 {
-	const UImpostorBakerSettings* Settings = GetDefault<UImpostorBakerSettings>();
 	const UImpostorRenderTargetsManager* RenderTargetsManager = GetManager<UImpostorRenderTargetsManager>();
 
 	// Using Scratch RT allows the capture system to be simplistic, with any custom compositing done at the end. Combined maps can always override the original later.
@@ -354,15 +353,14 @@ void UImpostorMaterialsManager::UpdateDepthMaterial() const
 		return;
 	}
 
+	DepthMaterial->SetScalarParameterValue(FName("Radius"), GetManager<UImpostorComponentsManager>()->ObjectRadius * 2.f);
 	if (ImpostorData->ProjectionType == ECameraProjectionMode::Perspective)
 	{
-		DepthMaterial->SetScalarParameterValue(FName("Radius"), GetManager<UImpostorComponentsManager>()->ObjectRadius);
 		DepthMaterial->SetScalarParameterValue(FName("Distance"), ImpostorData->CameraDistance - GetManager<UImpostorComponentsManager>()->ObjectRadius * 0.8f);
 		DepthMaterial->SetScalarParameterValue(FName("Ortho"), 0.f);
 	}
 	else
 	{
-		DepthMaterial->SetScalarParameterValue(FName("Radius"), GetManager<UImpostorComponentsManager>()->ObjectRadius * 1.5f);
 		DepthMaterial->SetScalarParameterValue(FName("Ortho"), 1.f);
 	}
 }
