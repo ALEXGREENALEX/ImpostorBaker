@@ -3,6 +3,7 @@
 #include "ImpostorMaterialsManager.h"
 
 #include "ImpostorBakerSettings.h"
+#include "ImpostorBakerUtilities.h"
 #include "ImpostorComponentsManager.h"
 #include "ImpostorRenderTargetsManager.h"
 
@@ -230,6 +231,16 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	return NewMaterial;
 }
 
+void UImpostorMaterialsManager::UpdateDepthMaterialData(const FVector& ViewCaptureDirection) const
+{
+	FVector X, Y, Z;
+	FImpostorBakerUtilities::DeriveAxes(ViewCaptureDirection, X, Y, Z);
+
+	DepthMaterial->SetVectorParameterValue(FName("X"), X);
+	DepthMaterial->SetVectorParameterValue(FName("Y"), Y);
+	DepthMaterial->SetVectorParameterValue(FName("Z"), Z);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -353,16 +364,8 @@ void UImpostorMaterialsManager::UpdateDepthMaterial() const
 		return;
 	}
 
-	DepthMaterial->SetScalarParameterValue(FName("Radius"), GetManager<UImpostorComponentsManager>()->ObjectRadius * 2.f);
-	if (ImpostorData->ProjectionType == ECameraProjectionMode::Perspective)
-	{
-		DepthMaterial->SetScalarParameterValue(FName("Distance"), ImpostorData->CameraDistance - GetManager<UImpostorComponentsManager>()->ObjectRadius * 0.8f);
-		DepthMaterial->SetScalarParameterValue(FName("Ortho"), 0.f);
-	}
-	else
-	{
-		DepthMaterial->SetScalarParameterValue(FName("Ortho"), 1.f);
-	}
+	DepthMaterial->SetVectorParameterValue(FName("Origin"), GetManager<UImpostorComponentsManager>()->ReferencedMeshComponent->Bounds.Origin);
+	DepthMaterial->SetScalarParameterValue(FName("Radius"), GetManager<UImpostorComponentsManager>()->ObjectRadius);
 }
 
 void UImpostorMaterialsManager::UpdateAddAlphaFromFinalColorMaterial() const

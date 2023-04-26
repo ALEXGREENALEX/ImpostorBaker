@@ -25,6 +25,8 @@ public:
 	bool HasRenderTypeMaterial(EImpostorBakeMapType TargetMap) const;
 	UMaterialInstanceConstant* SaveMaterial(const TMap<EImpostorBakeMapType, UTexture2D*>& Textures) const;
 
+	void UpdateDepthMaterialData(const FVector& ViewCaptureDirection) const;
+
 private:
 	void CreatePreviewMaterial();
 	void UpdateImpostorMaterial() const;

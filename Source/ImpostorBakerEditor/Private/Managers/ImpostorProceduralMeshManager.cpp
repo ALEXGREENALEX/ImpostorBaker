@@ -103,6 +103,8 @@ void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMate
 		return;
 	}
 
+	NewMesh->MarkPackageDirty();
+
 	FAssetRegistryModule::AssetCreated(NewMesh);
 }
 

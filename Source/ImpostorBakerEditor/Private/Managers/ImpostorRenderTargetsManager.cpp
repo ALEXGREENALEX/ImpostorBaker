@@ -6,6 +6,7 @@
 #include "ImpostorBakerUtilities.h"
 #include "ImpostorMaterialsManager.h"
 #include "ImpostorComponentsManager.h"
+#include "ImpostorProceduralMeshManager.h"
 
 #include "Engine/Canvas.h"
 #include "MaterialInstanceDynamic.h"
@@ -422,8 +423,7 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 		SceneCaptureComponent2D->SetWorldLocation(WorldLocation);
 		SceneCaptureComponent2D->SetWorldRotation((Vector * -1.f).ToOrientationRotator());
 
-		FVector X, Y, Z;
-		FImpostorBakerUtilities::DeriveAxes(Vector * -1.f, X, Y, Z);
+		GetManager<UImpostorMaterialsManager>()->UpdateDepthMaterialData(Vector);
 
 		SceneWorld->SendAllEndOfFrameUpdates();
 		SceneCaptureComponent2D->UpdateSceneCaptureContents(SceneWorld->Scene);
@@ -488,6 +488,11 @@ void UImpostorRenderTargetsManager::FinalizeBaking()
 	ForceTick(false);
 
 	CurrentMap = EImpostorBakeMapType::None;
+
+	if (ImpostorData->bUseMeshCutout)
+	{
+		GetManager<UImpostorProceduralMeshManager>()->Update();
+	}
 }
 
 void UImpostorRenderTargetsManager::CustomCompositing() const
