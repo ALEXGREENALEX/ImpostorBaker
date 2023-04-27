@@ -18,6 +18,7 @@ public:
 	//~ End UImpostorBaseManager Interface
 
 private:
+	void UpdateReferencedMeshData();
 	void UpdateComponentsData();
 	void SetupOctahedronLayout();
 	void SetupTraditionalBillboardLayout();
@@ -39,6 +40,9 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<UStaticMeshComponent*> VisualizedMeshes;
+
+	UPROPERTY(Transient)
+	TMap<FName, UMaterialInstanceDynamic*> OverridenMeshMaterials;
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = "Base")

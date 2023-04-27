@@ -138,7 +138,8 @@ void UImpostorData::AssignMesh(const FAssetData& MeshAssetData)
 {
 	FullSphereMaterial = GetDefault<UImpostorBakerSettings>()->DefaultFullSphereMaterial.LoadSynchronous();
 	UpperHemisphereMaterial = GetDefault<UImpostorBakerSettings>()->DefaultUpperHemisphereMaterial.LoadSynchronous();
-	BillboardMaterial = GetDefault<UImpostorBakerSettings>()->DefaultBillboardMaterial.LoadSynchronous();
+	BillboardMaterial = bGenerateTwoSidedGeometry ? GetDefault<UImpostorBakerSettings>()->DefaultBillboardMaterial.LoadSynchronous() : GetDefault<UImpostorBakerSettings>()->DefaultBillboardTwoSidedMaterial.LoadSynchronous();
+	EnableWPOParameterName = GetDefault<UImpostorBakerSettings>()->EnableWPOParameterName;
 
 	ReferencedMesh = Cast<UStaticMesh>(MeshAssetData.GetAsset());
 	UpdateMeshData(ReferencedMesh);

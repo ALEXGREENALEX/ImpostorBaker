@@ -66,6 +66,11 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
 	TSoftObjectPtr<UMaterialInterface> AddAlphaFromFinalColor = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_AddAlphaFromFinalColor.M_AddAlphaFromFinalColor"));
 
+	// Default parameter name used to disable WPO usage for mesh.
+	// To have constant results, it is recommended to add lerp(0, {WPO}, Impostor_WPO) into mesh materials.
+	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters")
+	FName EnableWPOParameterName = "Impostor_WPO";
+
 	UPROPERTY(Config, EditAnywhere, Category = "Material Parameters|Impostor Preview")
 	FName ImpostorPreviewSpecular = "Specular";
 

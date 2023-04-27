@@ -4,6 +4,7 @@
 #include "ImpostorData.h"
 #include "ImpostorBakerUtilities.h"
 #include "ImpostorLightingManager.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 void UImpostorComponentsManager::Initialize()
 {
@@ -21,6 +22,7 @@ void UImpostorComponentsManager::Initialize()
 
 void UImpostorComponentsManager::Update()
 {
+	UpdateReferencedMeshData();
 	UpdateComponentsData();
 }
 
@@ -28,12 +30,43 @@ void UImpostorComponentsManager::Update()
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-void UImpostorComponentsManager::UpdateComponentsData()
+void UImpostorComponentsManager::UpdateReferencedMeshData()
 {
 	ReferencedMeshComponent->SetStaticMesh(ImpostorData->ReferencedMesh);
 	ReferencedMeshComponent->SetForcedLodModel(0);
 	ReferencedMeshComponent->SetRelativeLocation(FVector(ReferencedMeshComponent->Bounds.SphereRadius * -2.25f, 0.f, 10.f));
 
+	TSet<FName> UnusedMaterials;
+	OverridenMeshMaterials.GetKeys(UnusedMaterials);
+
+	for (const FStaticMaterial& Material : ReferencedMeshComponent->GetStaticMesh()->GetStaticMaterials())
+	{
+		UnusedMaterials.Remove(Material.MaterialSlotName);
+
+		if (UMaterialInstanceDynamic* OverridenMaterial = OverridenMeshMaterials.FindRef(Material.MaterialSlotName))
+		{
+			if (OverridenMaterial->Parent == Material.MaterialInterface)
+			{
+				OverridenMaterial->SetScalarParameterValue(ImpostorData->EnableWPOParameterName, 0.f);
+				continue;
+			}
+		}
+
+		UMaterialInstanceDynamic* NewMaterial = UMaterialInstanceDynamic::Create(Material.MaterialInterface, ReferencedMeshComponent);
+		NewMaterial->SetScalarParameterValue(ImpostorData->EnableWPOParameterName, 0.f);
+
+		OverridenMeshMaterials.Add(Material.MaterialSlotName, NewMaterial);
+		ReferencedMeshComponent->SetMaterialByName(Material.MaterialSlotName, NewMaterial);
+	}
+
+	for (FName UnusedMaterial : UnusedMaterials)
+	{
+		OverridenMeshMaterials.Remove(UnusedMaterial);
+	}
+}
+
+void UImpostorComponentsManager::UpdateComponentsData()
+{
 	ObjectRadius = ReferencedMeshComponent->Bounds.SphereRadius;
 	OffsetVector = ReferencedMeshComponent->Bounds.Origin - ReferencedMeshComponent->GetComponentLocation();
 	DebugTexelSize = ObjectRadius / 16.f;

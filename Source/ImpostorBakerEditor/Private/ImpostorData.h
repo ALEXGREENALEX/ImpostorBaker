@@ -118,6 +118,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Default")
 	EImpostorLayoutType ImpostorType = EImpostorLayoutType::UpperHemisphereOnly;
 
+	// To have constant results, it is recommended to add lerp(0, {WPO}, Impostor_WPO) into mesh materials.
+	// Value will be set to 0.
+	UPROPERTY(EditAnywhere, Category = "Default")
+	FName EnableWPOParameterName;
+
 	// Number of XY frames to capture into the atlas.
 	UPROPERTY(EditAnywhere, Category = "Impostors", meta = (ClampMin = 1, EditCondition = "ImpostorType != EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	int32 FramesCount = 16;
