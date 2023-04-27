@@ -8,18 +8,23 @@
 #include "ImpostorBakerSettings.generated.h"
 
 UCLASS(Config = ImpostorBaker, DefaultConfig, meta = (DisplayName = "Impostor Baker"))
-class IMPOSTORBAKEREDITOR_API UImpostorBakerSettings : public UDeveloperSettings
+class IMPOSTORBAKEREDITOR_API UImpostorBakerSettings : public UObject
 {
 	GENERATED_BODY()
 
-	//~ Begin UDeveloperSettings Interface
-	virtual FName GetCategoryName() const override
-	{
-		return TEXT("Plugins");
-	}
-	//~ End UDeveloperSettings Interface
-
 public:
+	//~ Begin UObject Interface
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override
+	{
+		Super::PostEditChangeProperty(PropertyChangedEvent);
+
+		if (PropertyChangedEvent.ChangeType != EPropertyChangeType::Interactive)
+		{
+			TryUpdateDefaultConfigFile();
+		}
+	}
+	//~ End UObject Interface
+
 	UPROPERTY(Config, EditAnywhere, Category = "Default")
 	TMap<EImpostorBakeMapType, TSoftObjectPtr<UMaterialInterface>> BufferPostProcessMaterials = {
 		{EImpostorBakeMapType::BaseColor, TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/Engine/BufferVisualization/FinalImage.FinalImage"))},
@@ -38,7 +43,10 @@ public:
 	TSoftObjectPtr<UMaterialInterface> DefaultUpperHemisphereMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/MI_Impostor_Hemisphere.MI_Impostor_Hemisphere"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
-	TSoftObjectPtr<UMaterialInterface> DefaultBillboardMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/MI_Billboard_No_POM.MI_Billboard_No_POM"));
+	TSoftObjectPtr<UMaterialInterface> DefaultBillboardMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/M_Billboard.M_Billboard"));
+
+	UPROPERTY(Config, EditAnywhere, Category = "Materials")
+	TSoftObjectPtr<UMaterialInterface> DefaultBillboardTwoSidedMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/M_Billboard_TwoSided.M_Billboard_TwoSided"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
 	TSoftObjectPtr<UMaterialInterface> BaseColorCustomLightingMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_BaseColor_CustomLighting.M_BaseColor_CustomLighting"));

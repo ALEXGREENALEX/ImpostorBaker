@@ -55,11 +55,13 @@ private:
 	static constexpr const TCHAR* ViewportTabId = TEXT("FBuildingObjectEditorToolkit_Viewport");
 	static constexpr const TCHAR* DetailsTabId = TEXT("FBuildingObjectEditorToolkit_Details");
 	static constexpr const TCHAR* TransientDetailsTabId = TEXT("FBuildingObjectEditorToolkit_TransientDetails");
+	static constexpr const TCHAR* GlobalSettingsTabId = TEXT("FBuildingObjectEditorToolkit_GlobalSettings");
 
 	UImpostorData* ObjectBeingEdited = nullptr;
 	TArray<FName> RegisteredTabIds;
 
 	TSharedPtr<IDetailsView> DetailsView;
 	TSharedPtr<IDetailsView> TransientDetailsView;
+	TSharedPtr<IDetailsView> GlobalSettingsDetailsView;
 	TSharedPtr<SImpostorBakerViewport> Viewport;
 };

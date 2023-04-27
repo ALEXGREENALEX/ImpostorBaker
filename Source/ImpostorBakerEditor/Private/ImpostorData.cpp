@@ -111,6 +111,10 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	{
 		UpdateFOVDistance();
 	}
+	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, bGenerateTwoSidedGeometry))
+	{
+		BillboardMaterial = bGenerateTwoSidedGeometry ? GetDefault<UImpostorBakerSettings>()->DefaultBillboardMaterial.LoadSynchronous() : GetDefault<UImpostorBakerSettings>()->DefaultBillboardTwoSidedMaterial.LoadSynchronous();
+	}
 
 	if (const FSimpleMulticastDelegate* Delegate = OnPropertyInteractiveChange.Find(PropertyChangedEvent.GetMemberPropertyName()))
 	{

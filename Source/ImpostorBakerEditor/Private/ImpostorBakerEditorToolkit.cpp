@@ -2,6 +2,7 @@
 
 #include "ImpostorBakerEditorToolkit.h"
 #include "ImpostorData.h"
+#include "ImpostorBakerSettings.h"
 #include "Scene/SImpostorBakerViewport.h"
 #include "Managers/ImpostorBakerManager.h"
 
@@ -107,11 +108,14 @@ void FImpostorBakerEditorToolkit::CreateInternalWidgets()
 	.Object(ObjectBeingEdited);
 
 	TransientDetailsView->SetObject(Viewport->GetManager());
+
+	GlobalSettingsDetailsView = PropertyModule.CreateDetailView(Args);
+	GlobalSettingsDetailsView->SetObject(GetMutableDefault<UImpostorBakerSettings>());
 }
 
 TSharedRef<FTabManager::FLayout> FImpostorBakerEditorToolkit::GetLayout()
 {
-	return FTabManager::NewLayout("FImpostorBakerEditorToolkit_Layout_V1")
+	return FTabManager::NewLayout("FImpostorBakerEditorToolkit_Layout_V2")
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()
@@ -122,6 +126,7 @@ TSharedRef<FTabManager::FLayout> FImpostorBakerEditorToolkit::GetLayout()
 				->SetSizeCoefficient(0.3f)
 				->AddTab(DetailsTabId, ETabState::OpenedTab)
 				->AddTab(TransientDetailsTabId, ETabState::OpenedTab)
+				->AddTab(GlobalSettingsTabId, ETabState::OpenedTab)
 				->SetForegroundTab(FName(DetailsTabId))
 			)
 			->Split
@@ -135,9 +140,10 @@ TSharedRef<FTabManager::FLayout> FImpostorBakerEditorToolkit::GetLayout()
 
 void FImpostorBakerEditorToolkit::RegisterTabs(TArray<FTab>& OutTabs) const
 {
-	OutTabs.Add({ViewportTabId, INVTEXT("Viewport"), "LevelEditor.Tabs.Viewports", Viewport});
-	OutTabs.Add({DetailsTabId, INVTEXT("Details"), "LevelEditor.Tabs.Details", DetailsView});
-	OutTabs.Add({TransientDetailsTabId, INVTEXT("Transient Details"), "LevelEditor.Tabs.Details", TransientDetailsView});
+	OutTabs.Add({ ViewportTabId, INVTEXT("Viewport"), "LevelEditor.Tabs.Viewports", Viewport });
+	OutTabs.Add({ DetailsTabId, INVTEXT("Details"), "LevelEditor.Tabs.Details", DetailsView });
+	OutTabs.Add({ TransientDetailsTabId, INVTEXT("Transient Details"), "LevelEditor.Tabs.Details", TransientDetailsView });
+	OutTabs.Add({ GlobalSettingsTabId, INVTEXT("Global Settings"), "LevelEditor.Tabs.Details", GlobalSettingsDetailsView });
 }
 
 void FImpostorBakerEditorToolkit::BuildToolbar(FToolBarBuilder& ToolBarBuilder) const

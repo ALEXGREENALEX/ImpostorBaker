@@ -119,59 +119,34 @@ public:
 	EImpostorLayoutType ImpostorType = EImpostorLayoutType::UpperHemisphereOnly;
 
 	// Number of XY frames to capture into the atlas.
-	UPROPERTY(EditAnywhere, Category = "Default", meta = (ClampMin = 1, EditCondition = "ImpostorType != EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category = "Impostors", meta = (ClampMin = 1, EditCondition = "ImpostorType != EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	int32 FramesCount = 16;
 
+	// Textures resolution
+	UPROPERTY(EditAnywhere, Category = "Impostors", meta = (EditCondition = "ImpostorType != EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	int32 Resolution = 2048;
+
+	UPROPERTY(EditAnywhere, Category = "Traditional Billboards", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	int32 FrameSize = 256;
+
 	// Will generate two sided geometry for traditional billboards (2x horizontal frames)
-	UPROPERTY(EditAnywhere, Category = "Default", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category = "Traditional Billboards", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	bool bGenerateTwoSidedGeometry = true;
 
 	// Number of horizontal frames for traditional billboards
-	UPROPERTY(EditAnywhere, Category = "Default", meta = (ClampMin = 1, ClampMax = 4, EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category = "Traditional Billboards", meta = (ClampMin = 1, ClampMax = 4, EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	int32 HorizontalFramesCount = 3;
 
-	UPROPERTY(EditAnywhere, Category = "Default", meta = (ClampMin = 1, ClampMax = 3, EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category = "Traditional Billboards", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	bool bCaptureTopFrame = true;
 
-	UPROPERTY(EditAnywhere, Category = "Default", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
-	int32 FrameSize = 256;
+	// Offsets the center vert of the top card in the traditional billboard mode.
+	UPROPERTY(EditAnywhere, Category = "Traditional Billboards", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards && bCaptureTopFrame", EditConditionHides))
+	float BillboardTopOffset = 0.5f;
 
-	// Allows higher quality silhouette blending as well as subsurface edge effects. Makes rendering take much longer.
-	UPROPERTY(EditAnywhere, Category = "Default")
-	bool bUseDistanceFieldAlpha = true;
-
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
-	float DirectionalLightBrightness = 3.14;
-
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (ClampMin = 1))
-	int32 LightingGridSize = 4;
-
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
-	float UpwardBias = 0.75f;
-
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
-	float CustomSkyLightIntensity = 1.f;
-
-	// Optionally multiplies Base Color by the custom lighting texture, using settings under Custom Lighting
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
-	bool bCombineLightingAndColor = false;
-
-	// (CustomLightingValue * {Power}) * BaseColor
-	// Lower power values produces custom lighting as 1, so it doesn't change the base color;
-	// Power as 1 uses original custom lighting, so it affects the brightness of base color.
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0.001"))
-	float CustomLightingPower = 0.001f;
-
-	// 0 - custom lighting won't affect base color, 1 - fully affects base color
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0", ClampMax = "1"))
-	float CustomLightingOpacity = 0.f;
-
-	// Multiplies custom lighting value (allows to brighten/darken the object)
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides))
-	float CustomLightingMultiplier = 1.f;
-
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides))
-	float CustomLightingDesaturation = 0.5f;
+	// Offsets the entire Z card in the traditional billboard mode.
+	UPROPERTY(EditAnywhere, Category = "Traditional Billboards", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards && bCaptureTopFrame", EditConditionHides))
+	float BillboardTopOffsetCenter = 0.75f;
 
 	// Material used for Full Sphere mode.
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::FullSphereView", EditConditionHides))
@@ -184,6 +159,10 @@ public:
 	// Material used for simple billboard mode.
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	UMaterialInterface* BillboardMaterial;
+
+	// Composites the depth texture into the normal's alpha. This should be left on unless you are rolling a custom material since all included materials expect it
+	UPROPERTY(EditAnywhere, Category = "Material")
+	bool bCombineNormalAndDepth = true;
 
 	UPROPERTY(EditAnywhere, Category = "Material")
 	float Specular = 0.5f;
@@ -231,49 +210,67 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (ClampMin = "1"))
 	int32 DilationMaxSteps = 64;
 
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
+	float DirectionalLightBrightness = 3.14;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (ClampMin = 1))
+	int32 LightingGridSize = 4;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
+	float UpwardBias = 0.75f;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
+	float CustomSkyLightIntensity = 1.f;
+
+	// Optionally multiplies Base Color by the custom lighting texture, using settings under Custom Lighting
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting")
+	bool bCombineLightingAndColor = false;
+
+	// (CustomLightingValue * {Power}) * BaseColor
+	// Lower power values produces custom lighting as 1, so it doesn't change the base color;
+	// Power as 1 uses original custom lighting, so it affects the brightness of base color.
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0.001"))
+	float CustomLightingPower = 0.001f;
+
+	// 0 - custom lighting won't affect base color, 1 - fully affects base color
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0", ClampMax = "1"))
+	float CustomLightingOpacity = 0.f;
+
+	// Multiplies custom lighting value (allows to brighten/darken the object)
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides))
+	float CustomLightingMultiplier = 1.f;
+
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting", meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides))
+	float CustomLightingDesaturation = 0.5f;
+
+	// Orthographic is the most accurate, but some shader effects require a perspective view. The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
+	UPROPERTY(EditAnywhere, Category = "Projection")
+	TEnumAsByte<ECameraProjectionMode::Type> ProjectionType = ECameraProjectionMode::Type::Perspective;
+
+	UPROPERTY(EditAnywhere, Category = "Projection", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
+	EImpostorPerspectiveCameraType PerspectiveCameraType = EImpostorPerspectiveCameraType::FOV;
+
+	// Distance at which to capture. The Projection Distance should be set as far back as it can without introducing too many Z fighting artifacts.
+	UPROPERTY(EditAnywhere, Category = "Projection", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
+	float CameraDistance = 1000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Projection", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
+	float CameraFOV = 20.f;
+
 	UPROPERTY(EditAnywhere, Category = "Advanced")
 	bool bPreviewCaptureSphere = false;
 
-	// Composites the depth texture into the normal's alpha. This should be left on unless you are rolling a custom material since all included materials expect it
-	UPROPERTY(EditAnywhere, Category = "Advanced")
-	bool bCombineNormalAndDepth = true;
-
-	// Orthographic is the most accurate, but some shader effects require a perspective view. The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
-	UPROPERTY(EditAnywhere, Category = "Advanced")
-	TEnumAsByte<ECameraProjectionMode::Type> ProjectionType = ECameraProjectionMode::Type::Perspective;
-
-	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
-	EImpostorPerspectiveCameraType PerspectiveCameraType = EImpostorPerspectiveCameraType::FOV;
-
-	// Distance at which to capture. The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
-	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
-	float CameraDistance = 1000.f;
-
-	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
-	float CameraFOV = 20.f;
-
-	// Textures resolution
-	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ImpostorType != EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
-	int32 Resolution = 2048;
-
-	// Resolution for scene capturing. Generally should be slightly higher than sub frame resolution. Large sizes (>512) will take a long time to render due to distance field calculation
-	UPROPERTY(EditAnywhere, Category = "Advanced")
-	int32 SceneCaptureResolution = 512;
-
-	// Offsets the center vert of the top card in the traditional billboard mode.
-	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
-	float BillboardTopOffset = 0.5f;
-
-	// Offsets the entire Z card in the traditional billboard mode.
-	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
-	float BillboardTopOffsetCenter = 0.75f;
-
 	// Optionally disable mesh cutouts. Useful for debugging, such as to see the whole debug triangle view.
 	UPROPERTY(EditAnywhere, Category = "Advanced")
-	bool bUseMeshCutout = false;
+	bool bUseMeshCutout = true;
 
+	// Allows higher quality silhouette blending as well as subsurface edge effects. Makes rendering take much longer.
 	UPROPERTY(EditAnywhere, Category = "Advanced")
-	TArray<FVector> ManualPoints;
+	bool bUseDistanceFieldAlpha = true;
+
+	// Resolution for scene capturing (single frame before compositing into one texture). Generally should be slightly higher than sub frame resolution. Large sizes (>512) will take a long time to render due to distance field calculation
+	UPROPERTY(EditAnywhere, Category = "Advanced")
+	int32 SceneCaptureResolution = 512;
 
 	UPROPERTY(VisibleAnywhere, Category = "Advanced", AdvancedDisplay)
 	int32 SceneCaptureMips = 9;

@@ -243,113 +243,95 @@ void UImpostorProceduralMeshManager::GenerateMeshData()
 
 	TArray<FVector> CardNormalList = GetNormalCards();
 
-	if (ImpostorData->ManualPoints.Num() == 0)
+	for (int32 NormalsIndex = 0; NormalsIndex < CardNormalList.Num(); NormalsIndex++)
 	{
-		for (int32 NormalsIndex = 0; NormalsIndex < CardNormalList.Num(); NormalsIndex++)
+		FImpostorTextureData TextureData;
+		TextureData = BakeAlphasData(NormalsIndex, TextureData);
+
+		TArray<FVector2D> LocalPoints;
+		LocalPoints.Reserve(8);
+
+		for (int32 CornerIndex = 0; CornerIndex < 4; CornerIndex++)
 		{
-			FImpostorTextureData TextureData;
-			TextureData = BakeAlphasData(NormalsIndex, TextureData);
+			float MinSlope = 1000.f;
+			TArray<float> MinSlopes{FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX};
+			int32 CornerX = -1;
+			int32 CornerY = -1;
 
-			TArray<FVector2D> LocalPoints;
-			LocalPoints.Reserve(8);
-
-			for (int32 CornerIndex = 0; CornerIndex < 4; CornerIndex++)
+			// Finds potential cut angles with non-intersecting edges
+			for (int32 Index = 0; Index < 8; Index++)
 			{
-				float MinSlope = 1000.f;
-				TArray<float> MinSlopes{FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX};
-				int32 CornerX = -1;
-				int32 CornerY = -1;
+				int32 X = 0;
+				int32 Y = 0;
 
-				// Finds potential cut angles with non-intersecting edges
-				for (int32 Index = 0; Index < 8; Index++)
+				FImpostorBakerUtilities::TraceUntilIntersection(CornerIndex, TextureData, ImpostorData->ImpostorType, Index, X, Y);
+
+				// Find the first intersection or "Corner"
+				if (Y < 16 &&
+					CornerX == -1 &&
+					CornerY == -1)
 				{
-					int32 X = 0;
-					int32 Y = 0;
-
-					FImpostorBakerUtilities::TraceUntilIntersection(CornerIndex, TextureData, ImpostorData->ImpostorType, Index, X, Y);
-
-					// Find the first intersection or "Corner"
-					if (Y < 16 &&
-						CornerX == -1 &&
-						CornerY == -1)
-					{
-						CornerX = X;
-						CornerY = Y;
-						continue;
-					}
-
-					// Once a corner is found, trace down in lines, finding intersection slopes and proposed alternates
-					if (Y >= 16)
-					{
-						continue;
-					}
-
-					const float Run = X - CornerX;
-					const float Rise = Y - CornerY;
-
-					for (int32 RiseOffset = 0; RiseOffset < 4; RiseOffset++)
-					{
-						MinSlopes[RiseOffset] = FMath::Min(MinSlopes[RiseOffset], (Rise + RiseOffset) / Run);
-					}
+					CornerX = X;
+					CornerY = Y;
+					continue;
 				}
 
-				// Finds the most optimal potential slice. In theory anyways.
-				float LargestArea = -FLT_MAX;
-				int32 CornerOffset = -1;
-				for (int32 CornerOffsetIndex = 0; CornerOffsetIndex < 4; CornerOffsetIndex++)
+				// Once a corner is found, trace down in lines, finding intersection slopes and proposed alternates
+				if (Y >= 16)
 				{
-					const float CornerOffsetBias = float(CornerY - CornerOffsetIndex);
-					const float CurrentArea = MinSlopes[CornerOffsetIndex] == 0.f ? 0.f : CornerOffsetBias * FMath::Abs(CornerOffsetBias / MinSlopes[CornerOffsetIndex]) / 2.f;
-					if (CurrentArea < LargestArea)
-					{
-						continue;
-					}
-
-					LargestArea = CurrentArea;
-					CornerOffset = CornerOffsetIndex;
-					MinSlope = MinSlopes[CornerOffsetIndex];
+					continue;
 				}
 
-				// Un-rotate final corners.
+				const float Run = X - CornerX;
+				const float Rise = Y - CornerY;
+
+				for (int32 RiseOffset = 0; RiseOffset < 4; RiseOffset++)
 				{
-					FVector2D Degrees0;
-					FVector2D Degrees90;
-					FVector2D Degrees180;
-					FVector2D Degrees270;
-					FImpostorBakerUtilities::GetRotatedCoords(FVector2D(CornerX, CornerY - CornerOffset), 16, false, Degrees0, Degrees90, Degrees180, Degrees270);
-
-					switch (CornerIndex)
-					{
-					default: check(false);
-					case 0: LocalPoints.Add(Degrees0); break;
-					case 1: LocalPoints.Add(Degrees90 + FVector2D(1.f, 0.f)); break;
-					case 2: LocalPoints.Add(Degrees180 + FVector2D(1.f, 1.f)); break;
-					case 3: LocalPoints.Add(Degrees270 + FVector2D(0.f, 1.f)); break;
-					}
+					MinSlopes[RiseOffset] = FMath::Min(MinSlopes[RiseOffset], (Rise + RiseOffset) / Run);
 				}
-
-				LocalPoints.Add(FImpostorBakerUtilities::GetRotatedCoordsByCorner(FVector2D(1.f, MinSlope).GetSafeNormal(), 16, true, CornerIndex));
 			}
 
-			CutCorners(LocalPoints);
-			Points.Add(CardNormalList[NormalsIndex], FImpostorPoints{ LocalPoints });
-			GenerateMeshVerticesAndUVs(LocalPoints, NormalsIndex, CardNormalList[NormalsIndex]);
+			// Finds the most optimal potential slice. In theory anyways.
+			float LargestArea = -FLT_MAX;
+			int32 CornerOffset = -1;
+			for (int32 CornerOffsetIndex = 0; CornerOffsetIndex < 4; CornerOffsetIndex++)
+			{
+				const float CornerOffsetBias = float(CornerY - CornerOffsetIndex);
+				const float CurrentArea = MinSlopes[CornerOffsetIndex] == 0.f ? 0.f : CornerOffsetBias * FMath::Abs(CornerOffsetBias / MinSlopes[CornerOffsetIndex]) / 2.f;
+				if (CurrentArea < LargestArea)
+				{
+					continue;
+				}
+
+				LargestArea = CurrentArea;
+				CornerOffset = CornerOffsetIndex;
+				MinSlope = MinSlopes[CornerOffsetIndex];
+			}
+
+			// Un-rotate final corners.
+			{
+				FVector2D Degrees0;
+				FVector2D Degrees90;
+				FVector2D Degrees180;
+				FVector2D Degrees270;
+				FImpostorBakerUtilities::GetRotatedCoords(FVector2D(CornerX, CornerY - CornerOffset), 16, false, Degrees0, Degrees90, Degrees180, Degrees270);
+
+				switch (CornerIndex)
+				{
+				default: check(false);
+				case 0: LocalPoints.Add(Degrees0); break;
+				case 1: LocalPoints.Add(Degrees90 + FVector2D(1.f, 0.f)); break;
+				case 2: LocalPoints.Add(Degrees180 + FVector2D(1.f, 1.f)); break;
+				case 3: LocalPoints.Add(Degrees270 + FVector2D(0.f, 1.f)); break;
+				}
+			}
+
+			LocalPoints.Add(FImpostorBakerUtilities::GetRotatedCoordsByCorner(FVector2D(1.f, MinSlope).GetSafeNormal(), 16, true, CornerIndex));
 		}
-	}
 
-	if (ImpostorData->ManualPoints.Num() > 0)
-	{
-		TArray<FVector2D> LocalPoints;
-		LocalPoints.Reserve(ImpostorData->ManualPoints.Num());
-
-		const UImpostorComponentsManager* ComponentsManager = GetManager<UImpostorComponentsManager>();
-		for (const FVector& Point : ImpostorData->ManualPoints)
-		{
-			FVector ObjectSize(ComponentsManager->ObjectRadius * -2.f, 0.f, -10.f);
-			LocalPoints.Add(FVector2D((Point - ObjectSize + FVector(ComponentsManager->DebugTexelSize * 16.f / 2.f, ComponentsManager->DebugTexelSize * 16.f / 2.f, 0.f)) / ComponentsManager->DebugTexelSize));
-		}
-
-		GenerateMeshVerticesAndUVs(LocalPoints, 0, CardNormalList[0]);
+		CutCorners(LocalPoints);
+		Points.Add(CardNormalList[NormalsIndex], FImpostorPoints{ LocalPoints });
+		GenerateMeshVerticesAndUVs(LocalPoints, NormalsIndex, CardNormalList[NormalsIndex]);
 	}
 
 	MeshComponent->ClearMeshSection(0);
