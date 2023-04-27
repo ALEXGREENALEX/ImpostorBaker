@@ -8,9 +8,9 @@
 #include "ImpostorRenderTargetsManager.h"
 
 #include "AssetToolsModule.h"
-#include "MaterialInstanceDynamic.h"
-#include "MaterialInstanceConstant.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInstanceConstant.h"
 #include "Factories/MaterialInstanceConstantFactoryNew.h"
 
 void UImpostorMaterialsManager::Initialize()
@@ -25,9 +25,6 @@ void UImpostorMaterialsManager::Initialize()
 
 	SampleFrameMaterial = UMaterialInstanceDynamic::Create(Settings->SampleFrameMaterial.LoadSynchronous(), nullptr);
 	check(SampleFrameMaterial);
-
-	SampleFrameDFAlphaMaterial = UMaterialInstanceDynamic::Create(Settings->SampleFrameDFAlphaMaterial.LoadSynchronous(), nullptr);
-	check(SampleFrameDFAlphaMaterial);
 
 	AddAlphasMaterial = UMaterialInstanceDynamic::Create(Settings->AddAlphasMaterial.LoadSynchronous(), nullptr);
 	check(AddAlphasMaterial);
@@ -98,7 +95,6 @@ void UImpostorMaterialsManager::Update()
 	CreatePreviewMaterial();
 
 	UpdateSampleFrameMaterial();
-	UpdateSampleFrameDFAlphaMaterial();
 	UpdateAddAlphasMaterial();
 	UpdateBaseColorCustomLightingMaterial();
 	UpdateCombinedNormalsDepthMaterial();
@@ -112,12 +108,6 @@ void UImpostorMaterialsManager::Update()
 
 UMaterialInstanceDynamic* UImpostorMaterialsManager::GetSampleMaterial(const EImpostorBakeMapType TargetMap) const
 {
-	if (ImpostorData->bUseDistanceFieldAlpha &&
-		(TargetMap == EImpostorBakeMapType::BaseColor))
-	{
-		return SampleFrameDFAlphaMaterial;
-	}
-
 	if (TargetMap == EImpostorBakeMapType::WorldNormal)
 	{
 		SampleFrameMaterial->SetScalarParameterValue("Bias", 1.f);
@@ -127,6 +117,18 @@ UMaterialInstanceDynamic* UImpostorMaterialsManager::GetSampleMaterial(const EIm
 	{
 		SampleFrameMaterial->SetScalarParameterValue("Bias", 0.f);
 		SampleFrameMaterial->SetScalarParameterValue("Scale", 1.f);
+	}
+
+	SampleFrameMaterial->SetScalarParameterValue("UseSRGBBaseColor", TargetMap == EImpostorBakeMapType::BaseColor ? 1.f : 0.f);
+
+	if (ImpostorData->bUseDistanceFieldAlpha &&
+		(TargetMap == EImpostorBakeMapType::BaseColor))
+	{
+		SampleFrameMaterial->SetScalarParameterValue("UseDistanceField", 1.f);
+	}
+	else
+	{
+		SampleFrameMaterial->SetScalarParameterValue("UseDistanceField", 0.f);
 	}
 
 	return SampleFrameMaterial;
@@ -211,7 +213,7 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	NewMaterial->SetScalarParameterValueEditorOnly(FName("Dither"), ImpostorData->Dither);
 	NewMaterial->SetScalarParameterValueEditorOnly(FName("PDO"), ImpostorData->PixelDepthOffset);
 
-	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewFramesCount, ComponentsManager->NumFrames);
+	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewFramesCount, ComponentsManager->NumHorizontalFrames);
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewMeshRadius, ComponentsManager->ObjectRadius * 2.f);
 	NewMaterial->SetVectorParameterValueEditorOnly(Settings->ImpostorPreviewPivotOffset, FLinearColor(ComponentsManager->OffsetVector));
 
@@ -274,7 +276,7 @@ void UImpostorMaterialsManager::UpdateImpostorMaterial() const
 	ImpostorPreviewMaterial->SetScalarParameterValue("Dither", ImpostorData->Dither);
 	ImpostorPreviewMaterial->SetScalarParameterValue("PDO", ImpostorData->PixelDepthOffset);
 
-	ImpostorPreviewMaterial->SetScalarParameterValue(Settings->ImpostorPreviewFramesCount, ComponentsManager->NumFrames);
+	ImpostorPreviewMaterial->SetScalarParameterValue(Settings->ImpostorPreviewFramesCount, ComponentsManager->NumHorizontalFrames);
 	ImpostorPreviewMaterial->SetScalarParameterValue(Settings->ImpostorPreviewMeshRadius, ComponentsManager->ObjectRadius * 2.f);
 	ImpostorPreviewMaterial->SetVectorParameterValue(Settings->ImpostorPreviewPivotOffset, ComponentsManager->OffsetVector);
 
@@ -292,23 +294,13 @@ void UImpostorMaterialsManager::UpdateImpostorMaterial() const
 
 void UImpostorMaterialsManager::UpdateSampleFrameMaterial() const
 {
-	SampleFrameMaterial->SetTextureParameterValue(FName("BaseColor"), GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain[0]);
+	SampleFrameMaterial->SetTextureParameterValue(FName("SRGBBaseColor"), GetManager<UImpostorRenderTargetsManager>()->SceneCaptureSRGBMip);
+	SampleFrameMaterial->SetTextureParameterValue(FName("LinearBaseColor"), GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain[0]);
 	SampleFrameMaterial->SetTextureParameterValue(FName("Alpha"), GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain[0]);
+	SampleFrameMaterial->SetTextureParameterValue(FName("MipAlpha"), GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain[FMath::Min(GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain.Num() - 1, ImpostorData->DFMipTarget)]);
 	SampleFrameMaterial->SetScalarParameterValue(FName("TextureSize"), ImpostorData->SceneCaptureResolution);
 	SampleFrameMaterial->SetScalarParameterValue(FName("Dilation"), ImpostorData->Dilation);
-	SampleFrameDFAlphaMaterial->SetScalarParameterValue(FName("DilationMaxSteps"), ImpostorData->DilationMaxSteps);
-}
-
-void UImpostorMaterialsManager::UpdateSampleFrameDFAlphaMaterial() const
-{
-	const UImpostorRenderTargetsManager* RenderTargetsManager = GetManager<UImpostorRenderTargetsManager>();
-
-	SampleFrameDFAlphaMaterial->SetTextureParameterValue(FName("BaseColor"), RenderTargetsManager->SceneCaptureMipChain[0]);
-	SampleFrameDFAlphaMaterial->SetTextureParameterValue(FName("Alpha"), RenderTargetsManager->SceneCaptureMipChain[0]);
-	SampleFrameDFAlphaMaterial->SetTextureParameterValue(FName("MipAlpha"), RenderTargetsManager->SceneCaptureMipChain[FMath::Min(RenderTargetsManager->SceneCaptureMipChain.Num() - 1, ImpostorData->DFMipTarget)]);
-	SampleFrameDFAlphaMaterial->SetScalarParameterValue(FName("TextureSize"), ImpostorData->SceneCaptureResolution);
-	SampleFrameDFAlphaMaterial->SetScalarParameterValue(FName("Dilation"), ImpostorData->Dilation);
-	SampleFrameDFAlphaMaterial->SetScalarParameterValue(FName("DilationMaxSteps"), ImpostorData->DilationMaxSteps);
+	SampleFrameMaterial->SetScalarParameterValue(FName("DilationMaxSteps"), ImpostorData->DilationMaxSteps);
 }
 
 void UImpostorMaterialsManager::UpdateAddAlphasMaterial() const
@@ -323,7 +315,7 @@ void UImpostorMaterialsManager::UpdateBaseColorCustomLightingMaterial() const
 	const UImpostorRenderTargetsManager* RenderTargetsManager = GetManager<UImpostorRenderTargetsManager>();
 
 	// Using Scratch RT allows the capture system to be simplistic, with any custom compositing done at the end. Combined maps can always override the original later.
-	BaseColorCustomLightingMaterial->SetTextureParameterValue(FName("BaseColor"), RenderTargetsManager->ScratchRenderTarget);
+	BaseColorCustomLightingMaterial->SetTextureParameterValue(FName("BaseColor"), RenderTargetsManager->BaseColorScratchRenderTarget);
 
 	if (UTextureRenderTarget2D* RenderTarget = RenderTargetsManager->TargetMaps.FindRef(EImpostorBakeMapType::CustomLighting))
 	{

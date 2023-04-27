@@ -122,6 +122,20 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Default", meta = (ClampMin = 1, EditCondition = "ImpostorType != EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	int32 FramesCount = 16;
 
+	// Will generate two sided geometry for traditional billboards (2x horizontal frames)
+	UPROPERTY(EditAnywhere, Category = "Default", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	bool bGenerateTwoSidedGeometry = true;
+
+	// Number of horizontal frames for traditional billboards
+	UPROPERTY(EditAnywhere, Category = "Default", meta = (ClampMin = 1, ClampMax = 4, EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	int32 HorizontalFramesCount = 3;
+
+	UPROPERTY(EditAnywhere, Category = "Default", meta = (ClampMin = 1, ClampMax = 3, EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	bool bCaptureTopFrame = true;
+
+	UPROPERTY(EditAnywhere, Category = "Default", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	int32 FrameSize = 256;
+
 	// Allows higher quality silhouette blending as well as subsurface edge effects. Makes rendering take much longer.
 	UPROPERTY(EditAnywhere, Category = "Default")
 	bool bUseDistanceFieldAlpha = true;
@@ -208,7 +222,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	float Dither = 1.f;
 
-	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category = "Material")
 	float PixelDepthOffset = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (ClampMin = "0", ClampMax = "1"))
@@ -239,7 +253,7 @@ public:
 	float CameraFOV = 20.f;
 
 	// Textures resolution
-	UPROPERTY(EditAnywhere, Category = "Advanced")
+	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "ImpostorType != EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	int32 Resolution = 2048;
 
 	// Resolution for scene capturing. Generally should be slightly higher than sub frame resolution. Large sizes (>512) will take a long time to render due to distance field calculation

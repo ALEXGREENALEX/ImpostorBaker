@@ -26,7 +26,6 @@ public class ImpostorBakerEditor : ModuleRules
                 "CommonMenuExtensions",
                 "AdvancedPreviewScene",
                 "ProceduralMeshComponent",
-                "BlueprintMaterialTextureNodes",
             }
         );
     }

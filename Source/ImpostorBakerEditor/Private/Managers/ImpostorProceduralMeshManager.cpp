@@ -9,12 +9,12 @@
 
 #include "MeshDescription.h"
 #include "AssetToolsModule.h"
-#include "MaterialInstanceDynamic.h"
 #include "ProceduralMeshComponent.h"
 #include "ProceduralMeshConversion.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInstanceConstant.h"
-#include "BlueprintMaterialTextureNodesBPLibrary.h"
 
 void UImpostorProceduralMeshManager::Initialize()
 {
@@ -239,18 +239,19 @@ void UImpostorProceduralMeshManager::GenerateMeshData()
 	UVs = {};
 	Triangles = {};
 	Tangents = {};
+	Points = {};
 
 	TArray<FVector> CardNormalList = GetNormalCards();
 
 	if (ImpostorData->ManualPoints.Num() == 0)
 	{
-		FImpostorTextureData TextureData;
 		for (int32 NormalsIndex = 0; NormalsIndex < CardNormalList.Num(); NormalsIndex++)
 		{
+			FImpostorTextureData TextureData;
 			TextureData = BakeAlphasData(NormalsIndex, TextureData);
 
-			TArray<FVector2D> Points;
-			Points.Reserve(8);
+			TArray<FVector2D> LocalPoints;
+			LocalPoints.Reserve(8);
 
 			for (int32 CornerIndex = 0; CornerIndex < 4; CornerIndex++)
 			{
@@ -320,34 +321,35 @@ void UImpostorProceduralMeshManager::GenerateMeshData()
 					switch (CornerIndex)
 					{
 					default: check(false);
-					case 0: Points.Add(Degrees0); break;
-					case 1: Points.Add(Degrees90 + FVector2D(1.f, 0.f)); break;
-					case 2: Points.Add(Degrees180 + FVector2D(1.f, 1.f)); break;
-					case 3: Points.Add(Degrees270 + FVector2D(0.f, 1.f)); break;
+					case 0: LocalPoints.Add(Degrees0); break;
+					case 1: LocalPoints.Add(Degrees90 + FVector2D(1.f, 0.f)); break;
+					case 2: LocalPoints.Add(Degrees180 + FVector2D(1.f, 1.f)); break;
+					case 3: LocalPoints.Add(Degrees270 + FVector2D(0.f, 1.f)); break;
 					}
 				}
 
-				Points.Add(FImpostorBakerUtilities::GetRotatedCoordsByCorner(FVector2D(1.f, MinSlope).GetSafeNormal(), 16, true, CornerIndex));
+				LocalPoints.Add(FImpostorBakerUtilities::GetRotatedCoordsByCorner(FVector2D(1.f, MinSlope).GetSafeNormal(), 16, true, CornerIndex));
 			}
 
-			CutCorners(Points);
-			GenerateMeshVerticesAndUVs(Points, NormalsIndex, CardNormalList[NormalsIndex]);
+			CutCorners(LocalPoints);
+			Points.Add(CardNormalList[NormalsIndex], FImpostorPoints{ LocalPoints });
+			GenerateMeshVerticesAndUVs(LocalPoints, NormalsIndex, CardNormalList[NormalsIndex]);
 		}
 	}
 
 	if (ImpostorData->ManualPoints.Num() > 0)
 	{
-		TArray<FVector2D> Points;
-		Points.Reserve(ImpostorData->ManualPoints.Num());
+		TArray<FVector2D> LocalPoints;
+		LocalPoints.Reserve(ImpostorData->ManualPoints.Num());
 
 		const UImpostorComponentsManager* ComponentsManager = GetManager<UImpostorComponentsManager>();
 		for (const FVector& Point : ImpostorData->ManualPoints)
 		{
 			FVector ObjectSize(ComponentsManager->ObjectRadius * -2.f, 0.f, -10.f);
-			Points.Add(FVector2D((Point - ObjectSize + FVector(ComponentsManager->DebugTexelSize * 16.f / 2.f, ComponentsManager->DebugTexelSize * 16.f / 2.f, 0.f)) / ComponentsManager->DebugTexelSize));
+			LocalPoints.Add(FVector2D((Point - ObjectSize + FVector(ComponentsManager->DebugTexelSize * 16.f / 2.f, ComponentsManager->DebugTexelSize * 16.f / 2.f, 0.f)) / ComponentsManager->DebugTexelSize));
 		}
 
-		GenerateMeshVerticesAndUVs(Points, 0, CardNormalList[0]);
+		GenerateMeshVerticesAndUVs(LocalPoints, 0, CardNormalList[0]);
 	}
 
 	MeshComponent->ClearMeshSection(0);
@@ -363,60 +365,50 @@ TArray<FVector> UImpostorProceduralMeshManager::GetNormalCards() const
 {
 	if (ImpostorData->ImpostorType == EImpostorLayoutType::TraditionalBillboards)
 	{
-		const UImpostorRenderTargetsManager* RenderTargetsManager = GetManager<UImpostorRenderTargetsManager>();
-		RenderTargetsManager->ClearRenderTarget(RenderTargetsManager->CombinedAlphasRenderTarget);
-
-		if (UTextureRenderTarget2D* RenderTarget = RenderTargetsManager->TargetMaps.FindRef(EImpostorBakeMapType::BaseColor))
-		{
-			RenderTargetsManager->ResampleRenderTarget(RenderTarget, RenderTargetsManager->CombinedAlphasRenderTarget);
-		}
-
 		return GetManager<UImpostorComponentsManager>()->ViewCaptureVectors;
 	}
 
-	return {FVector::UpVector};
+	return { FVector::UpVector };
 }
 
 FImpostorTextureData UImpostorProceduralMeshManager::BakeAlphasData(const int32 Index, const FImpostorTextureData& Data) const
 {
-	FLinearColor Rectangle;
-	switch (ImpostorData->ImpostorType)
+	if (Data.SizeX != 0)
 	{
-	default: check(false);
-	case EImpostorLayoutType::FullSphereView:
-	case EImpostorLayoutType::UpperHemisphereOnly:
-	{
-		if (Data.SizeX != 0)
-		{
-			return Data;
-		}
-
-		Rectangle = FLinearColor(0.f, 0.f, 16.f, 16.f);
-		break;
-	}
-	case EImpostorLayoutType::TraditionalBillboards:
-	{
-		FVector2D VectorIndex(Index % 3, FMath::Floor(Index / 3));
-		VectorIndex *= 16.f;
-		Rectangle = FLinearColor(VectorIndex.X, VectorIndex.Y, VectorIndex.X + 16.f, VectorIndex.Y + 16.f);
-		break;
-	}
+		return Data;
 	}
 
-	TArray<FLinearColor> ColorData = UBlueprintMaterialTextureNodesBPLibrary::RenderTarget_SampleRectangle_EditorOnly(GetManager<UImpostorRenderTargetsManager>()->CombinedAlphasRenderTarget, Rectangle);
+	const FIntRect Rectangle(0, 0, 16, 16);
+
+	TArray<float> Alphas;
+	Alphas.Reserve(256);
+	Alphas.SetNum(256);
 
 	if (!ImpostorData->bUseMeshCutout)
 	{
-		for (int32 ColorIndex = 0; ColorIndex < ColorData.Num(); ColorIndex++)
+		for (int32 ColorIndex = 0; ColorIndex < Alphas.Num(); ColorIndex++)
 		{
-			ColorData[ColorIndex] = FLinearColor::White;
+			Alphas[ColorIndex] = 1.f;
+		}
+	}
+	else
+	{
+		FTextureRenderTargetResource* RTResource = GetManager<UImpostorRenderTargetsManager>()->CombinedAlphas[Index]->GameThread_GetRenderTargetResource();
+
+		const FReadSurfaceDataFlags ReadPixelFlags(RCM_MinMax);
+
+		TArray<FColor> Colors;
+		RTResource->ReadPixels(Colors, ReadPixelFlags, Rectangle);
+		for (int32 ColorIndex = 0; ColorIndex < FMath::Min(Alphas.Num(), Colors.Num()); ColorIndex++)
+		{
+			Alphas[ColorIndex] = float(Colors[ColorIndex].R) / 255.f;
 		}
 	}
 
 	FImpostorTextureData Result;
 	Result.SizeX = 16;
 	Result.SizeY = 16;
-	Result.Colors = ColorData;
+	Result.Alphas = Alphas;
 
 	return Result;
 }
@@ -425,24 +417,24 @@ FImpostorTextureData UImpostorProceduralMeshManager::BakeAlphasData(const int32 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
-void UImpostorProceduralMeshManager::CutCorners(TArray<FVector2D>& Points) const
+void UImpostorProceduralMeshManager::CutCorners(TArray<FVector2D>& LocalPoints) const
 {
 	// Cut Corners
 	for (int32 CornerIndex = 0; CornerIndex < 4; CornerIndex++)
 	{
 		const int32 PreviousCornerIndex = CornerIndex * 2;
 		const int32 CurrentCornerIndex = CornerIndex * 2 + 1;
-		const int32 NextCornerIndex = (CornerIndex * 2 + 2) % Points.Num();
-		if (!ensure(Points.IsValidIndex(PreviousCornerIndex)) ||
-			!ensure(Points.IsValidIndex(CurrentCornerIndex)) ||
-			!ensure(Points.IsValidIndex(NextCornerIndex)))
+		const int32 NextCornerIndex = (CornerIndex * 2 + 2) % LocalPoints.Num();
+		if (!ensure(LocalPoints.IsValidIndex(PreviousCornerIndex)) ||
+			!ensure(LocalPoints.IsValidIndex(CurrentCornerIndex)) ||
+			!ensure(LocalPoints.IsValidIndex(NextCornerIndex)))
 		{
 			continue;
 		}
 
-		const FVector2D& PreviousCorner = Points[PreviousCornerIndex];
-		const FVector2D& CurrentCorner = Points[CurrentCornerIndex];
-		const FVector2D& NextCorner = Points[NextCornerIndex];
+		const FVector2D& PreviousCorner = LocalPoints[PreviousCornerIndex];
+		const FVector2D& CurrentCorner = LocalPoints[CurrentCornerIndex];
+		const FVector2D& NextCorner = LocalPoints[NextCornerIndex];
 
 		FVector2D Result = FVector2D::ZeroVector;
 		switch (CornerIndex)
@@ -469,35 +461,33 @@ void UImpostorProceduralMeshManager::CutCorners(TArray<FVector2D>& Points) const
 		}
 
 		Result += PreviousCorner;
-		Points[CurrentCornerIndex] = Result;
+		LocalPoints[CurrentCornerIndex] = Result;
 	}
 }
 
-void UImpostorProceduralMeshManager::GenerateMeshVerticesAndUVs(const TArray<FVector2D>& Points, const int32 CardIndex, const FVector& CardNormal)
+void UImpostorProceduralMeshManager::GenerateMeshVerticesAndUVs(const TArray<FVector2D>& LocalPoints, const int32 CardIndex, const FVector& CardNormal)
 {
 	const int32 VertexOffset = Vertices.Num();
-	const int32 NumNewVertices = Points.Num() + 1;
+	const int32 NumNewVertices = LocalPoints.Num() + 1;
 
 	const UImpostorComponentsManager* ComponentsManager = GetManager<UImpostorComponentsManager>();
+	const int32 BillboardTopCard = ComponentsManager->BillboardTopFrame;
+	const FVector2D NumFrames(ComponentsManager->NumHorizontalFrames, ComponentsManager->NumVerticalFrames);
 
 	switch (ImpostorData->ImpostorType)
 	{
 	default: check(false);
 	case EImpostorLayoutType::FullSphereView:
-	case EImpostorLayoutType::UpperHemisphereOnly: Vertices.Add(ComponentsManager->OffsetVector);
-		break;
-	case EImpostorLayoutType::TraditionalBillboards: Vertices.Add(ComponentsManager->OffsetVector + ((ImpostorData->BillboardTopOffsetCenter * ComponentsManager->ObjectRadius) + (ImpostorData->BillboardTopOffset * ComponentsManager->ObjectRadius)) * FVector::UpVector * (CardIndex == 4 ? 1.f : 0.f));
-		break;
+	case EImpostorLayoutType::UpperHemisphereOnly: Vertices.Add(ComponentsManager->OffsetVector); break;
+	case EImpostorLayoutType::TraditionalBillboards: Vertices.Add(ComponentsManager->OffsetVector + ((ImpostorData->BillboardTopOffsetCenter * ComponentsManager->ObjectRadius) + (ImpostorData->BillboardTopOffset * ComponentsManager->ObjectRadius)) * FVector::UpVector * (CardIndex == BillboardTopCard ? 1.f : 0.f)); break;
 	}
 
 	switch (ImpostorData->ImpostorType)
 	{
 	default: check(false);
 	case EImpostorLayoutType::FullSphereView:
-	case EImpostorLayoutType::UpperHemisphereOnly: UVs.Add(FVector2D(0.05f, 0.05f) / ComponentsManager->NumFrames);
-		break;
-	case EImpostorLayoutType::TraditionalBillboards: UVs.Add((FVector2D(0.5f, 0.5f) / ComponentsManager->NumFrames) + (FVector2D(CardIndex % 3, FMath::Floor(CardIndex / 3)) / 3.f) + (CardIndex == 4 ? 1.f : 0.f));
-		break;
+	case EImpostorLayoutType::UpperHemisphereOnly: UVs.Add(FVector2D(0.05f, 0.05f) / NumFrames); break;
+	case EImpostorLayoutType::TraditionalBillboards: UVs.Add((FVector2D(0.5f, 0.5f) / NumFrames) + (ConvertIndexToGrid(CardIndex) / NumFrames) + (CardIndex == BillboardTopCard ? 1.f : 0.f)); break;
 	}
 
 	const FProcMeshTangent Tangent = GetTangent(CardNormal);
@@ -507,10 +497,10 @@ void UImpostorProceduralMeshManager::GenerateMeshVerticesAndUVs(const TArray<FVe
 	Normals.Add(Normal);
 
 	// Construct Vertices from Cut Points
-	for (const FVector2D& Point : Points)
+	for (const FVector2D& Point : LocalPoints)
 	{
 		Vertices.Add(GetVertex(Point, CardIndex, CardNormal, ComponentsManager->OffsetVector, ComponentsManager->ObjectRadius));
-		UVs.Add(GetUV(CardIndex, Point, ComponentsManager->NumFrames));
+		UVs.Add(GetUV(CardIndex, Point, NumFrames));
 		Normals.Add(Normal);
 		Tangents.Add(Tangent);
 	}
@@ -537,34 +527,44 @@ FVector UImpostorProceduralMeshManager::GetVertex(FVector2D Point, const int32 C
 
 	Point = (Point - 0.5f) * 2.f;
 
-	switch (ImpostorData->ImpostorType)
+	if (ImpostorData->ImpostorType != EImpostorLayoutType::TraditionalBillboards)
 	{
-	default: check(false);
-	case EImpostorLayoutType::FullSphereView:
-	case EImpostorLayoutType::UpperHemisphereOnly: return FVector(Point * ObjectRadius / 10.f, 0.f) + OffsetVector;
-	case EImpostorLayoutType::TraditionalBillboards:
+		return FVector(Point * ObjectRadius / 10.f, 0.f) + OffsetVector;
+	}
+
+	FVector X, Y, Z;
+	FImpostorBakerUtilities::DeriveAxes(CardNormal, X, Y, Z);
+
+	FVector Result = ((Point.X * X) + (Point.Y * Y)) * ObjectRadius + OffsetVector;
+	if (CardIndex == GetManager<UImpostorComponentsManager>()->BillboardTopFrame)
 	{
-		FVector X, Y, Z;
-		FImpostorBakerUtilities::DeriveAxes(CardNormal, X, Y, Z);
-		return (((Point.X * X) + (Point.Y * Y)) * ObjectRadius + OffsetVector + ((ImpostorData->BillboardTopOffset * ObjectRadius) * (CardIndex == 4 ? 1.f : 0.f) * FVector::UpVector));
+		Result += ImpostorData->BillboardTopOffset * ObjectRadius * FVector::UpVector;
 	}
-	}
+
+	return Result;
 }
 
-FVector2D UImpostorProceduralMeshManager::GetUV(const int32 CardIndex, const FVector2D& Point, const int32 NumFrames) const
+FVector2D UImpostorProceduralMeshManager::GetUV(const int32 CardIndex, const FVector2D& Point, const FVector2D& NumFrames) const
 {
 	FVector2D TargetPoint = Point / 16.f;
 	TargetPoint.X = FMath::Clamp(TargetPoint.X, 0.f, 1.f);
 	TargetPoint.Y = FMath::Clamp(TargetPoint.Y, 0.f, 1.f);
+
 	TargetPoint /= NumFrames;
 
-	switch (ImpostorData->ImpostorType)
+	if (ImpostorData->ImpostorType != EImpostorLayoutType::TraditionalBillboards)
 	{
-	default: check(false);
-	case EImpostorLayoutType::FullSphereView:
-	case EImpostorLayoutType::UpperHemisphereOnly: return TargetPoint / 10.f;
-	case EImpostorLayoutType::TraditionalBillboards: return TargetPoint + FVector2D(CardIndex % 3, FMath::Floor(CardIndex / 3.f)) / 3.f + (CardIndex == 4 ? 1.f : 0.f);
+		return TargetPoint / 10.f;
 	}
+
+	TargetPoint += ConvertIndexToGrid(CardIndex) / NumFrames;
+
+	if (CardIndex == GetManager<UImpostorComponentsManager>()->BillboardTopFrame)
+	{
+		TargetPoint += FVector2D::One();
+	}
+
+	return TargetPoint;
 }
 
 FVector UImpostorProceduralMeshManager::GetNormalsVector(const FVector& CardNormal) const
@@ -587,4 +587,10 @@ FProcMeshTangent UImpostorProceduralMeshManager::GetTangent(const FVector& CardN
 	case EImpostorLayoutType::UpperHemisphereOnly: return FProcMeshTangent(FVector::ForwardVector, false);
 	case EImpostorLayoutType::TraditionalBillboards: return FProcMeshTangent(FImpostorBakerUtilities::DeriveAxis(CardNormal, EAxis::X), false);
 	}
+}
+
+FVector2D UImpostorProceduralMeshManager::ConvertIndexToGrid(const int32 Index) const
+{
+	const UImpostorComponentsManager* ComponentsManager = GetManager<UImpostorComponentsManager>();
+	return FVector2D(Index % ComponentsManager->NumHorizontalFrames, FMath::Floor(Index / ComponentsManager->NumHorizontalFrames));
 }

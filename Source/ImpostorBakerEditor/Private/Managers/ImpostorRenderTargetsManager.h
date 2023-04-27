@@ -87,7 +87,10 @@ public:
 	TArray<UTextureRenderTarget2D*> SceneCaptureMipChain;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
-	UTextureRenderTarget2D* CombinedAlphasRenderTarget;
+	UTextureRenderTarget2D* SceneCaptureSRGBMip;
+
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
+	TArray<UTextureRenderTarget2D*> CombinedAlphas;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
 	UTextureRenderTarget2D* ScratchRenderTarget;

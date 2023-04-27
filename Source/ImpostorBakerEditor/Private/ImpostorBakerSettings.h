@@ -47,10 +47,7 @@ public:
 	TSoftObjectPtr<UMaterialInterface> CombinedNormalsDepthMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_CombineNormalsDepth.M_CombineNormalsDepth"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
-	TSoftObjectPtr<UMaterialInterface> SampleFrameMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/MI_Sample_Frame.MI_Sample_Frame"));
-
-	UPROPERTY(Config, EditAnywhere, Category = "Materials")
-	TSoftObjectPtr<UMaterialInterface> SampleFrameDFAlphaMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/MI_SampleFrame_DistanceField.MI_SampleFrame_DistanceField"));
+	TSoftObjectPtr<UMaterialInterface> SampleFrameMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_Sample_Frame.M_Sample_Frame"));
 
 	UPROPERTY(Config, EditAnywhere, Category = "Materials")
 	TSoftObjectPtr<UMaterialInterface> AddAlphasMaterial = TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath("/ImpostorBaker/ImpostorBaker/Materials/Generation/M_AddAlpha.M_AddAlpha"));

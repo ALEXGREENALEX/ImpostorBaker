@@ -20,6 +20,11 @@ public:
 private:
 	void UpdateComponentsData();
 	void SetupOctahedronLayout();
+	void SetupTraditionalBillboardLayout();
+	void SetupPreviewMeshes();
+
+public:
+	FVector2D GetRenderTargetSize() const;
 
 public:
 	UPROPERTY(Transient)
@@ -46,7 +51,13 @@ public:
 	float DebugTexelSize = 0.f;
 
 	UPROPERTY(VisibleAnywhere, Category = "Base")
-	int32 NumFrames = 0;
+	int32 NumHorizontalFrames = 0;
+
+	UPROPERTY(VisibleAnywhere, Category = "Base")
+	int32 NumVerticalFrames = 0;
+
+	UPROPERTY(VisibleAnywhere, Category = "Base")
+	int32 BillboardTopFrame = 0;
 
 	UPROPERTY(VisibleAnywhere, Category = "Base")
 	TArray<FVector> ViewCaptureVectors;

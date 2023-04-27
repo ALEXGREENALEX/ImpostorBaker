@@ -31,7 +31,6 @@ private:
 	void CreatePreviewMaterial();
 	void UpdateImpostorMaterial() const;
 	void UpdateSampleFrameMaterial() const;
-	void UpdateSampleFrameDFAlphaMaterial() const;
 	void UpdateAddAlphasMaterial() const;
 	void UpdateBaseColorCustomLightingMaterial() const;
 	void UpdateCombinedNormalsDepthMaterial() const;
@@ -50,9 +49,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
 	UMaterialInstanceDynamic* SampleFrameMaterial;
-
-	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* SampleFrameDFAlphaMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
 	UMaterialInstanceDynamic* AddAlphasMaterial;

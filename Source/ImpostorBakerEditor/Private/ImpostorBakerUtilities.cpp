@@ -61,9 +61,7 @@ int32 FImpostorBakerUtilities::TraceUntilIntersection(const int32 CornerPass, co
 	for (int32 Index = 0; Index < 16; Index++)
 	{
 		FVector2D Z = GetRotatedCoordsByCorner(FVector2D(OutX, OutY), 16, false, CornerPass);
-		const FLinearColor Color = TextureData.GetColor(Z);
-		const float ColorValue = Type == EImpostorLayoutType::TraditionalBillboards ? Color.A : Color.R;
-		if (ColorValue > 0.0001f)
+		if (!FMath::IsNearlyZero(TextureData.GetAlpha(Z)))
 		{
 			return Index;
 		}

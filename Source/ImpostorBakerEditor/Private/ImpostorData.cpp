@@ -48,6 +48,10 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	{
 		Resolution = 1 << FMath::Clamp(FMath::FloorLog2(Resolution), 9, 14);
 	}
+	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, FrameSize))
+	{
+		FrameSize = 1 << FMath::Clamp(FMath::FloorLog2(FrameSize), 4, 11);
+	}
 	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, SceneCaptureResolution))
 	{
 		const uint32 Mip = FMath::Clamp(FMath::FloorLog2(Resolution), 7, 11);

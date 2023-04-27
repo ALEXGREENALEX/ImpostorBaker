@@ -13,12 +13,6 @@
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": false,
-	"Plugins": [
-		{
-			"Name": "BlueprintMaterialTextureNodes",
-			"Enabled": true
-		}
-	],
 	"Modules": [
 		{
 			"Name": "ImpostorBakerEditor",

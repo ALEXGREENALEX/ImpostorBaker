@@ -22,18 +22,27 @@ struct FImpostorTextureData
 	int32 SizeY = 0;
 
 	UPROPERTY(Transient)
-	TArray<FLinearColor> Colors;
+	TArray<float> Alphas;
 
-	FLinearColor GetColor(const FVector2D& VectorIndex) const
+	float GetAlpha(const FVector2D& VectorIndex) const
 	{
 		const int32 Index = FMath::Floor(VectorIndex.X) + SizeX * FMath::Floor(VectorIndex.Y);
-		if (!ensure(Colors.IsValidIndex(Index)))
+		if (!ensure(Alphas.IsValidIndex(Index)))
 		{
-			return FLinearColor::White;
+			return 1.f;
 		}
 
-		return Colors[Index];
+		return Alphas[Index];
 	}
+};
+
+USTRUCT()
+struct FImpostorPoints
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere)
+	TArray<FVector2D> Points;
 };
 
 UCLASS()
@@ -57,13 +66,15 @@ private:
 	TArray<FVector> GetNormalCards() const;
 	FImpostorTextureData BakeAlphasData(int32 Index, const FImpostorTextureData& Data) const;
 
-	void CutCorners(TArray<FVector2D>& Points) const;
+	void CutCorners(TArray<FVector2D>& LocalPoints) const;
 
-	void GenerateMeshVerticesAndUVs(const TArray<FVector2D>& Points, int32 CardIndex, const FVector& CardNormal);
+	void GenerateMeshVerticesAndUVs(const TArray<FVector2D>& LocalPoints, int32 CardIndex, const FVector& CardNormal);
 	FVector GetVertex(FVector2D Point, int32 CardIndex, const FVector& CardNormal, const FVector& OffsetVector, float ObjectRadius) const;
-	FVector2D GetUV(int32 CardIndex, const FVector2D& Point, int32 NumFrames) const;
+	FVector2D GetUV(int32 CardIndex, const FVector2D& Point, const FVector2D& NumFrames) const;
 	FVector GetNormalsVector(const FVector& CardNormal) const;
 	FProcMeshTangent GetTangent(const FVector& CardNormal) const;
+
+	FVector2D ConvertIndexToGrid(int32 Index) const;
 
 private:
 	UPROPERTY(Transient)
@@ -84,4 +95,7 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Procedural Mesh Data")
 	TArray<FProcMeshTangent> Tangents;
+
+	UPROPERTY(VisibleAnywhere, Transient, Category = "Procedural Mesh Data")
+	TMap<FVector, FImpostorPoints> Points;
 };
