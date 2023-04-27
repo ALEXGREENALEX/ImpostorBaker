@@ -333,7 +333,7 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 			continue;
 		}
 
-		FString AssetName = ImpostorData->NewMeshName + "_" + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[TargetMap].ToString();
+		FString AssetName = ImpostorData->NewTextureName + "_" + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[TargetMap].ToString();
 		FString PackageName = ImpostorData->GetPackage(AssetName);
 
 		bool bCreatingNewTexture = false;
