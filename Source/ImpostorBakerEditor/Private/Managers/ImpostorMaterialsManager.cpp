@@ -177,6 +177,9 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	const FString AssetName = ImpostorData->NewMaterialName;
 	const FString PackageName = ImpostorData->GetPackage(AssetName);
 
+	TOptional<FMaterialUpdateContext> MaterialUpdateContext;
+	MaterialUpdateContext.Emplace(FMaterialUpdateContext::EOptions::Default & ~FMaterialUpdateContext::EOptions::RecreateRenderStates);
+
 	UMaterialInstanceConstant* NewMaterial = FindObject<UMaterialInstanceConstant>(CreatePackage(*PackageName), *AssetName);
 	if (!NewMaterial)
 	{
@@ -197,9 +200,11 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	{
 		if (NewMaterial->Parent != ImpostorPreviewMaterial->Parent)
 		{
-			NewMaterial->Parent = ImpostorPreviewMaterial->Parent;
+			NewMaterial->SetParentEditorOnly(ImpostorPreviewMaterial->Parent, true);
 		}
 	}
+
+	MaterialUpdateContext.GetValue().AddMaterialInstance(NewMaterial);
 
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewSpecular, ImpostorData->Specular);
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewRoughness, ImpostorData->Roughness);
@@ -229,6 +234,7 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	}
 
 	NewMaterial->PostEditChange();
+	NewMaterial->UpdateCachedData();
 
 	return NewMaterial;
 }

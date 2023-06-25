@@ -26,6 +26,7 @@ public class ImpostorBakerEditor : ModuleRules
                 "CommonMenuExtensions",
                 "AdvancedPreviewScene",
                 "ProceduralMeshComponent",
+                "RHI",
             }
         );
     }
