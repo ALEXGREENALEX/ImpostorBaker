@@ -8,6 +8,7 @@
 #include "SImpostorBakerViewportToolBar.h"
 
 #include "AdvancedPreviewScene.h"
+#include "ComponentReregisterContext.h"
 #include "Widgets/Text/SRichTextBlock.h"
 #include "BufferVisualizationMenuCommands.h"
 #include "Components/DirectionalLightComponent.h"

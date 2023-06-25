@@ -10,6 +10,7 @@
 #include "MeshDescription.h"
 #include "AssetToolsModule.h"
 #include "ProceduralMeshComponent.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "ProceduralMeshConversion.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "AssetRegistry/AssetRegistryModule.h"
