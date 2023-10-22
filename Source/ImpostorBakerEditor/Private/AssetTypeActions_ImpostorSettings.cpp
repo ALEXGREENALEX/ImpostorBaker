@@ -53,7 +53,7 @@ TSharedRef<FExtender> FAssetTypeActions_ImpostorSettings::OnExtendContentBrowser
 		"GetAssetActions",
 		EExtensionHook::After,
 		nullptr,
-		FMenuExtensionDelegate::CreateLambda([=](FMenuBuilder& MenuBuilder)
+		FMenuExtensionDelegate::CreateLambda([Assets](FMenuBuilder& MenuBuilder)
 		{
 			MenuBuilder.AddMenuEntry(
 				INVTEXT("Create Impostor Data"),
