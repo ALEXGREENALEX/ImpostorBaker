@@ -98,7 +98,7 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	}
 	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, ReferencedMesh))
 	{
-		UpdateMeshData(ReferencedMesh);
+		UpdateMeshData(ReferencedMesh.Get());
 	}
 	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(UImpostorData, TargetLOD))
 	{
@@ -142,7 +142,7 @@ void UImpostorData::AssignMesh(const FAssetData& MeshAssetData)
 	EnableWPOParameterName = GetDefault<UImpostorBakerSettings>()->EnableWPOParameterName;
 
 	ReferencedMesh = Cast<UStaticMesh>(MeshAssetData.GetAsset());
-	UpdateMeshData(ReferencedMesh);
+	UpdateMeshData(ReferencedMesh.Get());
 }
 
 void UImpostorData::UpdateMeshData(const FAssetData& MeshAssetData)

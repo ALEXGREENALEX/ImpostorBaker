@@ -100,7 +100,7 @@ public:
 	bool bMeshCastShadow = false;
 
 	UPROPERTY(EditAnywhere, Category = "Default")
-	UStaticMesh* ReferencedMesh;
+	TObjectPtr<UStaticMesh> ReferencedMesh;
 
 	// List of maps (textures) to render
 	UPROPERTY(EditAnywhere, Category = "Default")
@@ -155,15 +155,15 @@ public:
 
 	// Material used for Full Sphere mode.
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::FullSphereView", EditConditionHides))
-	UMaterialInterface* FullSphereMaterial;
+	TObjectPtr<UMaterialInterface> FullSphereMaterial;
 
 	// Material used for Upper Hemisphere mode.
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::UpperHemisphereOnly", EditConditionHides))
-	UMaterialInterface* UpperHemisphereMaterial;
+	TObjectPtr<UMaterialInterface> UpperHemisphereMaterial;
 
 	// Material used for simple billboard mode.
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
-	UMaterialInterface* BillboardMaterial;
+	TObjectPtr<UMaterialInterface> BillboardMaterial;
 
 	// Composites the depth texture into the normal's alpha. This should be left on unless you are rolling a custom material since all included materials expect it
 	UPROPERTY(EditAnywhere, Category = "Material")

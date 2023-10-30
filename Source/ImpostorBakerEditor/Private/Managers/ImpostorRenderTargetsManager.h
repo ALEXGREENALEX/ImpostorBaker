@@ -75,28 +75,28 @@ private:
 
 public:
 	UPROPERTY(Transient)
-	USceneCaptureComponent2D* SceneCaptureComponent2D;
+	TObjectPtr<USceneCaptureComponent2D> SceneCaptureComponent2D;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
 	TSet<EImpostorBakeMapType> MapsToSave;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
-	TMap<EImpostorBakeMapType, UTextureRenderTarget2D*> TargetMaps;
+	TMap<EImpostorBakeMapType, TObjectPtr<UTextureRenderTarget2D>> TargetMaps;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
-	TArray<UTextureRenderTarget2D*> SceneCaptureMipChain;
+	TArray<TObjectPtr<UTextureRenderTarget2D>> SceneCaptureMipChain;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
-	UTextureRenderTarget2D* SceneCaptureSRGBMip;
+	TObjectPtr<UTextureRenderTarget2D> SceneCaptureSRGBMip;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
-	TArray<UTextureRenderTarget2D*> CombinedAlphas;
+	TArray<TObjectPtr<UTextureRenderTarget2D>> CombinedAlphas;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
-	UTextureRenderTarget2D* ScratchRenderTarget;
+	TObjectPtr<UTextureRenderTarget2D> ScratchRenderTarget;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Render Targets")
-	UTextureRenderTarget2D* BaseColorScratchRenderTarget;
+	TObjectPtr<UTextureRenderTarget2D> BaseColorScratchRenderTarget;
 
 private:
 	UPROPERTY(Transient)

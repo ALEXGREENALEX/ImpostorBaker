@@ -78,7 +78,7 @@ private:
 
 private:
 	UPROPERTY(Transient)
-	UProceduralMeshComponent* MeshComponent;
+	TObjectPtr<UProceduralMeshComponent> MeshComponent;
 
 public:
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Procedural Mesh Data")

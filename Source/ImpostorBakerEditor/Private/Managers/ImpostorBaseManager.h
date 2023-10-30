@@ -110,10 +110,10 @@ public:
 
 protected:
 	UPROPERTY(Transient)
-	UImpostorData* ImpostorData;
+	TObjectPtr<UImpostorData> ImpostorData;
 
 	UPROPERTY(Transient)
-	UWorld* SceneWorld;
+	TObjectPtr<UWorld> SceneWorld;
 
 private:
 	FImpostorManageComponent AddComponentDelegate;

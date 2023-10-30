@@ -65,20 +65,20 @@ private:
 
 public:
 	UPROPERTY(Transient)
-	UImpostorData* ImpostorData;
+	TObjectPtr<UImpostorData> ImpostorData;
 
 	UPROPERTY(Transient)
-	UWorld* SceneWorld;
+	TObjectPtr<UWorld> SceneWorld;
 
 	UPROPERTY(Transient)
-	USkyLightComponent* SkyLight;
+	TObjectPtr<USkyLightComponent> SkyLight;
 
 	UPROPERTY(VisibleAnywhere, Transient, Instanced)
-	TArray<UImpostorBaseManager*> Managers;
+	TArray<TObjectPtr<UImpostorBaseManager>> Managers;
 
 private:
 	UPROPERTY(Transient)
-	TMap<FName, UImpostorBaseManager*> MappedManagers;
+	TMap<FName, TObjectPtr<UImpostorBaseManager>> MappedManagers;
 
 	TMap<FName, FString> TextItems;
 

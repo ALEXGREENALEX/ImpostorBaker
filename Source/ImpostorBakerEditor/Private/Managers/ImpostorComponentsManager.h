@@ -29,20 +29,20 @@ public:
 
 public:
 	UPROPERTY(Transient)
-	UStaticMeshComponent* ReferencedMeshComponent;
+	TObjectPtr<UStaticMeshComponent> ReferencedMeshComponent;
 
 private:
 	UPROPERTY(Transient)
-	UStaticMeshComponent* MeshStandComponent;
+	TObjectPtr<UStaticMeshComponent> MeshStandComponent;
 
 	UPROPERTY(Transient)
-	UStaticMeshComponent* ImpostorStandComponent;
+	TObjectPtr<UStaticMeshComponent> ImpostorStandComponent;
 
 	UPROPERTY(Transient)
-	TArray<UStaticMeshComponent*> VisualizedMeshes;
+	TArray<TObjectPtr<UStaticMeshComponent>> VisualizedMeshes;
 
 	UPROPERTY(Transient)
-	TMap<FName, UMaterialInstanceDynamic*> OverridenMeshMaterials;
+	TMap<FName, TObjectPtr<UMaterialInstanceDynamic>> OverridenMeshMaterials;
 
 public:
 	UPROPERTY(VisibleAnywhere, Category = "Base")

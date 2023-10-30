@@ -24,10 +24,10 @@ private:
 
 private:
 	UPROPERTY(EditAnywhere, Transient, Category = "Lighting")
-	USkyLightComponent* SkyLightComponent;
+	TObjectPtr<USkyLightComponent> SkyLightComponent;
 
 	UPROPERTY(Transient)
-	TArray<UDirectionalLightComponent*> Lights;
+	TArray<TObjectPtr<UDirectionalLightComponent>> Lights;
 
 public:
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Lighting")

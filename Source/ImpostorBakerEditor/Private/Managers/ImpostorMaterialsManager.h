@@ -39,26 +39,26 @@ private:
 
 public:
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* ImpostorPreviewMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> ImpostorPreviewMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* BaseColorCustomLightingMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> BaseColorCustomLightingMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* CombinedNormalsDepthMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> CombinedNormalsDepthMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* SampleFrameMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> SampleFrameMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* AddAlphasMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> AddAlphasMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* ResampleMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> ResampleMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* DepthMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> DepthMaterial;
 
 	UPROPERTY(VisibleAnywhere, Transient, Category = "Materials")
-	UMaterialInstanceDynamic* AddAlphaFromFinalColorMaterial;
+	TObjectPtr<UMaterialInstanceDynamic> AddAlphaFromFinalColorMaterial;
 };
