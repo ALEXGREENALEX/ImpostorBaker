@@ -1,12 +1,15 @@
 # ImpostorBaker
 
-Master branch tested on 5.1.1 UE version.
+Master branch tested on 5.1 - 5.3
 
 ## Changes
+ - Simplified workflow, no separate level, pressing right click on static mesh and selecting `Create Impostor Data` will create new `ImpostorData` asset, which will hold all the impostor data and through which impostor/traditional billboards creation workflow goes. ImpostorData asset is not necessary later, can be removed (useful to rebake the impostor after updating mesh);
+ - Removed necessity of ImpostorBakerSwitch material function for mesh materials;
+ - Created separate action with its own editor for impostor baking, making it more straightforward;
+ - Updated traditional billboards functionality;
 
-Changed the way of impostor creation, removed necessity of ImpostorBakerSwitch material function for mesh materials, created separate action with its own editor for impostor baking, making it more straightforward.
+https://github.com/Erlandys/ImpostorBaker/assets/6483175/07991163-5938-453d-99e5-23408317c540
 
-https://gyazo.com/fb48792629355110dc3f69e205a86991
 
 ## Forked from
 https://github.com/ictusbrucks/ImpostorBaker
