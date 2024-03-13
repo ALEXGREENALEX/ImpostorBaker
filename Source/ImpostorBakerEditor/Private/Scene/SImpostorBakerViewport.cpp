@@ -84,6 +84,7 @@ void SImpostorBakerViewport::PopulateOverlayText(const TMap<FName, FString>& Tex
 	}
 
 	FinalText.AppendLine(INVTEXT("<TextBlock.ShadowedText>Changing any parameter not in </><TextBlock.ShadowedTextWarning>Material</><TextBlock.ShadowedText> category, will require rebaking</>"));
+	FinalText.AppendLine(INVTEXT("<TextBlock.ShadowedTextWarning>Notice! </><TextBlock.ShadowedText>To have constant results, it is recommended to disable WPO in all mesh materials, reference to '</><TextBlock.ShadowedTextWarning>Disable WPO</><TextBlock.ShadowedText>' setting description</>"));
 
 	OverlayText->SetText(FinalText.ToText());
 	OverlayText->SetVisibility(TextItems.IsEmpty() ? EVisibility::Collapsed : EVisibility::SelfHitTestInvisible);

@@ -217,6 +217,7 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewMaskOffset, ImpostorData->MaskOffset);
 	NewMaterial->SetScalarParameterValueEditorOnly(FName("Dither"), ImpostorData->Dither);
 	NewMaterial->SetScalarParameterValueEditorOnly(FName("PDO"), ImpostorData->PixelDepthOffset);
+	NewMaterial->SetStaticSwitchParameterValueEditorOnly(FName("UsePDO"), ImpostorData->bEnablePixelDepthOffset);
 
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewFramesCount, ComponentsManager->NumHorizontalFrames);
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewMeshRadius, ComponentsManager->ObjectRadius * 2.f);
@@ -281,6 +282,7 @@ void UImpostorMaterialsManager::UpdateImpostorMaterial() const
 	ImpostorPreviewMaterial->SetScalarParameterValue(Settings->ImpostorPreviewMaskOffset, ImpostorData->MaskOffset);
 	ImpostorPreviewMaterial->SetScalarParameterValue("Dither", ImpostorData->Dither);
 	ImpostorPreviewMaterial->SetScalarParameterValue("PDO", ImpostorData->PixelDepthOffset);
+	ImpostorPreviewMaterial->SetStaticSwitchParameterValueEditorOnly(FName("UsePDO"), ImpostorData->bEnablePixelDepthOffset);
 
 	ImpostorPreviewMaterial->SetScalarParameterValue(Settings->ImpostorPreviewFramesCount, ComponentsManager->NumHorizontalFrames);
 	ImpostorPreviewMaterial->SetScalarParameterValue(Settings->ImpostorPreviewMeshRadius, ComponentsManager->ObjectRadius * 2.f);

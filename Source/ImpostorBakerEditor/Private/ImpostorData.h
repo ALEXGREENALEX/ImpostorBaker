@@ -126,6 +126,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Default")
 	EImpostorLayoutType ImpostorType = EImpostorLayoutType::UpperHemisphereOnly;
 
+	// This works only from 5.3 for all meshes and from 5.1 for nanite meshes.
+	// For incompatible meshes/engine versions, use `EnableWPOParameterName` and refer to its description.
+	UPROPERTY(EditAnywhere, Category = "Default")
+	bool bDisableWPO = true;
+
 	// To have constant results, it is recommended to add lerp(0, {WPO}, Impostor_WPO) into mesh materials.
 	// Value will be set to 0.
 	UPROPERTY(EditAnywhere, Category = "Default")
@@ -213,6 +218,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "ImpostorType == EImpostorLayoutType::TraditionalBillboards", EditConditionHides))
 	float Dither = 1.f;
+
+	UPROPERTY(EditAnywhere, Category = "Material")
+	bool bEnablePixelDepthOffset = true;
 
 	UPROPERTY(EditAnywhere, Category = "Material")
 	float PixelDepthOffset = 0.f;

@@ -42,6 +42,10 @@ void UImpostorComponentsManager::UpdateReferencedMeshData()
 	ReferencedMeshComponent->SetRelativeLocation(FVector(MeshBounds.SphereRadius * -2.25f, 0.f, MeshBounds.GetBox().GetExtent().Z - MeshBounds.Origin.Z));
 	ReferencedMeshComponent->SetForcedLodModel(0);
 
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION > 1
+	ReferencedMeshComponent->WorldPositionOffsetDisableDistance = ImpostorData->bDisableWPO ? 1 : 0;
+#endif
+
 	TSet<FName> UnusedMaterials;
 	OverridenMeshMaterials.GetKeys(UnusedMaterials);
 
