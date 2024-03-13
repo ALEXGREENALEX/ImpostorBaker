@@ -289,6 +289,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Advanced", AdvancedDisplay)
 	int32 DFMipTarget = 8;
 
+	UPROPERTY(VisibleAnywhere, Category = "Advanced", AdvancedDisplay)
+	bool bDisplayVertices = false;
+
 private:
 	bool bNeedUpdateCustomLightingBool = false;
 };

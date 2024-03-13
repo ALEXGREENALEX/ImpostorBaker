@@ -51,6 +51,11 @@ public:
 		return BakerManager;
 	}
 
+	UImpostorData* GetObjectData() const
+	{
+		return Object;
+	}
+
 	void PopulateOverlayText(const TMap<FName, FString>& TextItems) const;
 	void UpdateCamera() const;
 

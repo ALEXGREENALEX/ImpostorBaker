@@ -1,9 +1,15 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorBakerViewportClient.h"
+#include "CanvasItem.h"
+#include "Engine/Font.h"
+#include "CanvasTypes.h"
+#include "ImpostorData.h"
 #include "AdvancedPreviewScene.h"
 #include "SImpostorBakerViewport.h"
+#include "ProceduralMeshComponent.h"
 #include "Managers/ImpostorBakerManager.h"
+#include "Managers/ImpostorProceduralMeshManager.h"
 
 FImpostorBakerViewportClient::FImpostorBakerViewportClient(FAdvancedPreviewScene& InPreviewScene, const TSharedRef<SImpostorBakerViewport>& InViewport)
 	: FEditorViewportClient(nullptr, &InPreviewScene, InViewport)
@@ -29,6 +35,97 @@ FImpostorBakerViewportClient::FImpostorBakerViewportClient(FAdvancedPreviewScene
 
 	OverrideNearClipPlane(1.0f);
 	bUsingOrbitCamera = true;
+}
+
+void FImpostorBakerViewportClient::DrawCanvas(FViewport& InViewport, FSceneView& View, FCanvas& Canvas)
+{
+	FEditorViewportClient::DrawCanvas(InViewport, View, Canvas);
+
+	const TSharedPtr<SEditorViewport> PinnedViewport = EditorViewportWidget.Pin();
+	if (!PinnedViewport)
+	{
+		return;
+	}
+
+	const TSharedPtr<SImpostorBakerViewport> ImpostorBakerViewport = StaticCastSharedPtr<SImpostorBakerViewport>(PinnedViewport);
+	if (!ImpostorBakerViewport)
+	{
+		return;
+	}
+
+	const UImpostorData* Data = ImpostorBakerViewport->GetObjectData();
+	if (!Data ||
+		!Data->bDisplayVertices)
+	{
+		return;
+	}
+
+	const UImpostorBakerManager* Manager = ImpostorBakerViewport->GetManager();
+	if (!Manager)
+	{
+		return;
+	}
+
+	UImpostorProceduralMeshManager* MeshManager = Manager->GetManager<UImpostorProceduralMeshManager>();
+	if (!MeshManager)
+	{
+		return;
+	}
+
+	const int32 HalfX = Viewport->GetSizeXY().X / 2 / GetDPIScale();
+	const int32 HalfY = Viewport->GetSizeXY().Y / 2 / GetDPIScale();
+
+	TSet<FVector> UsedVertices;
+	for (const auto& It : MeshManager->Points)
+	{
+		for (int32 Index = 0; Index < It.Value.Points.Num(); Index++)
+		{
+			const FVector2D& Point = It.Value.Points[Index];
+			const FVector* VertexCoords = It.Value.PointToVertex.Find(Point);
+			if (!VertexCoords)
+			{
+				continue;
+			}
+			int32 VertexIndex = MeshManager->Vertices.IndexOfByKey(*VertexCoords);
+			UsedVertices.Add(*VertexCoords);
+
+			FString Text = LexToString(VertexIndex) + " [" + LexToString(Index) + "] " + Point.ToString();
+			const FPlane Projection = View.Project(MeshManager->MeshComponent->GetComponentLocation() + *VertexCoords);
+			if (Projection.W > 0.f)
+			{
+				const int32 XPos = HalfX + (HalfX * Projection.X);
+				const int32 YPos = HalfY + (HalfY * (Projection.Y * -1));
+
+				const int32 StringWidth = GEngine->GetSmallFont()->GetStringSize(*Text) / 2;
+				const int32 StringHeight = GEngine->GetSmallFont()->GetStringHeightSize(*Text);
+				FCanvasTextItem TextItem(FVector2D(XPos - StringWidth, YPos - StringHeight), FText::FromString(Text), GEngine->GetSmallFont(), FLinearColor::White);
+				TextItem.EnableShadow(FLinearColor::Black);
+				Canvas.DrawItem(TextItem);	
+			}
+		}
+	}
+	for (int32 Index = 0; Index < MeshManager->Vertices.Num(); Index++)
+	{
+		const FVector& Vertex = MeshManager->Vertices[Index];
+		if (UsedVertices.Contains(Vertex))
+		{
+			continue;
+		}
+
+		FString Text = LexToString(Index);
+		const FPlane Projection = View.Project(MeshManager->MeshComponent->GetComponentLocation() + Vertex);
+		if (Projection.W > 0.f)
+		{
+			const int32 XPos = HalfX + (HalfX * Projection.X);
+			const int32 YPos = HalfY + (HalfY * (Projection.Y * -1));
+
+			const int32 StringWidth = GEngine->GetSmallFont()->GetStringSize(*Text) / 2;
+			const int32 StringHeight = GEngine->GetSmallFont()->GetStringHeightSize(*Text);
+			FCanvasTextItem TextItem(FVector2D(XPos - StringWidth, YPos - StringHeight), FText::FromString(Text), GEngine->GetSmallFont(), FLinearColor::White);
+			TextItem.EnableShadow(FLinearColor::Black);
+			Canvas.DrawItem(TextItem);	
+		}
+	}
 }
 
 void FImpostorBakerViewportClient::Tick(float DeltaSeconds)

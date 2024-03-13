@@ -13,6 +13,7 @@ public:
 	FImpostorBakerViewportClient(FAdvancedPreviewScene& InPreviewScene, const TSharedRef<SImpostorBakerViewport>& InViewport);
 
 	//~ Begin FEditorViewportClient Interface
+	virtual void DrawCanvas(FViewport& InViewport, FSceneView& View, FCanvas& Canvas) override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool CanSetWidgetMode(UE::Widget::EWidgetMode NewMode) const override { return false; }
 	virtual bool CanCycleWidgetMode() const override { return false; }

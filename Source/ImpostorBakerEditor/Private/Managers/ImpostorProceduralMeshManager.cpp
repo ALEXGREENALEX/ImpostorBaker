@@ -254,22 +254,25 @@ void UImpostorProceduralMeshManager::GenerateMeshData()
 
 		for (int32 CornerIndex = 0; CornerIndex < 4; CornerIndex++)
 		{
-			float MinSlope = 1000.f;
+			float MinSlope = FLT_MAX;
 			TArray<float> MinSlopes{FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX};
 			int32 CornerX = -1;
 			int32 CornerY = -1;
 
 			// Finds potential cut angles with non-intersecting edges
-			for (int32 Index = 0; Index < 8; Index++)
+			for (int32 Index = 0; Index < 16; Index++)
 			{
 				int32 X = 0;
 				int32 Y = 0;
 
-				FImpostorBakerUtilities::TraceUntilIntersection(CornerIndex, TextureData, ImpostorData->ImpostorType, Index, X, Y);
+				// If no intersection found in column, continue
+				if (!FImpostorBakerUtilities::FindIntersection(CornerIndex, TextureData, ImpostorData->ImpostorType, Index, X, Y))
+				{
+					continue;
+				}
 
-				// Find the first intersection or "Corner"
-				if (Y < 16 &&
-					CornerX == -1 &&
+				// If first intersection not yet set
+				if (CornerX == -1 &&
 					CornerY == -1)
 				{
 					CornerX = X;
@@ -277,12 +280,7 @@ void UImpostorProceduralMeshManager::GenerateMeshData()
 					continue;
 				}
 
-				// Once a corner is found, trace down in lines, finding intersection slopes and proposed alternates
-				if (Y >= 16)
-				{
-					continue;
-				}
-
+				// How far away is the next intersection
 				const float Run = X - CornerX;
 				const float Rise = Y - CornerY;
 
@@ -420,31 +418,22 @@ void UImpostorProceduralMeshManager::CutCorners(TArray<FVector2D>& LocalPoints) 
 		const FVector2D& NextCorner = LocalPoints[NextCornerIndex];
 
 		FVector2D Result = FVector2D::ZeroVector;
-		switch (CornerIndex)
-		{
-		default: check(false);
-		case 0:
-		case 2:
+		if (CornerIndex % 2 == 0)
 		{
 			if (CurrentCorner.Y != 0.f)
 			{
 				Result = CurrentCorner / CurrentCorner.Y * (NextCorner.Y - PreviousCorner.Y);
 			}
-			break;
 		}
-		case 1:
-		case 3:
+		else
 		{
 			if (CurrentCorner.X != 0.f)
 			{
 				Result = CurrentCorner / CurrentCorner.X * (NextCorner.X - PreviousCorner.X);
 			}
-			break;
-		}
 		}
 
-		Result += PreviousCorner;
-		LocalPoints[CurrentCornerIndex] = Result;
+		LocalPoints[CurrentCornerIndex] = Result + PreviousCorner;
 	}
 }
 
@@ -486,6 +475,7 @@ void UImpostorProceduralMeshManager::GenerateMeshVerticesAndUVs(const TArray<FVe
 		UVs.Add(GetUV(CardIndex, Point, NumFrames));
 		Normals.Add(Normal);
 		Tangents.Add(Tangent);
+		Points[CardNormal].PointToVertex.Add(Point, Vertices.Last());
 	}
 
 	// Build Index Buffer

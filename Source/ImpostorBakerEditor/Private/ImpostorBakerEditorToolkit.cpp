@@ -202,8 +202,8 @@ void FImpostorBakerEditorToolkit::BuildToolbar(FToolBarBuilder& ToolBarBuilder) 
 				return !Viewport->GetManager()->NeedsCapture();
 			})),
 			NAME_None,
-			INVTEXT("Create Assets"),
-			INVTEXT("Creates impostor texture and materials assets"),
+			INVTEXT("Export to Asset"),
+			INVTEXT("Creates new mesh, textures and materials"),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.OpenPlaceActors"));
 
 		ToolBarBuilder.AddToolBarButton(
@@ -228,7 +228,7 @@ void FImpostorBakerEditorToolkit::BuildToolbar(FToolBarBuilder& ToolBarBuilder) 
 				return !Viewport->GetManager()->NeedsCapture();
 			})),
 			NAME_None,
-			INVTEXT("Add LOD to Mesh"),
+			INVTEXT("Export to LOD"),
 			INVTEXT("Creates material and textures for impostor and adds new LOD for referenced mesh"),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.LOD"));
 	}

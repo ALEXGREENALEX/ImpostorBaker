@@ -43,6 +43,9 @@ struct FImpostorPoints
 
 	UPROPERTY(VisibleAnywhere)
 	TArray<FVector2D> Points;
+
+	UPROPERTY(VisibleAnywhere)
+	TMap<FVector2D, FVector> PointToVertex;
 };
 
 UCLASS()
@@ -76,7 +79,7 @@ private:
 
 	FVector2D ConvertIndexToGrid(int32 Index) const;
 
-private:
+public:
 	UPROPERTY(Transient)
 	TObjectPtr<UProceduralMeshComponent> MeshComponent;
 

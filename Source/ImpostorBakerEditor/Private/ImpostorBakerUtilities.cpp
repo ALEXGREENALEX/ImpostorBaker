@@ -53,7 +53,7 @@ int32 FImpostorBakerUtilities::GetImpostorTypeResolution(const EImpostorLayoutTy
 	}
 }
 
-int32 FImpostorBakerUtilities::TraceUntilIntersection(const int32 CornerPass, const FImpostorTextureData& TextureData, const EImpostorLayoutType Type, const int32 StartX, int32& OutX, int32& OutY)
+bool FImpostorBakerUtilities::FindIntersection(const int32 CornerPass, const FImpostorTextureData& TextureData, const EImpostorLayoutType Type, const int32 StartX, int32& OutX, int32& OutY)
 {
 	OutX = StartX;
 	OutY = 0;
@@ -63,13 +63,13 @@ int32 FImpostorBakerUtilities::TraceUntilIntersection(const int32 CornerPass, co
 		FVector2D Z = GetRotatedCoordsByCorner(FVector2D(OutX, OutY), 16, false, CornerPass);
 		if (!FMath::IsNearlyZero(TextureData.GetAlpha(Z)))
 		{
-			return Index;
+			return true;
 		}
 
 		OutY++;
 	}
 
-	return INT32_MAX;
+	return false;
 }
 
 FVector2D FImpostorBakerUtilities::GetRotatedCoordsByCorner(const FVector2D& XY, int32 Size, bool bVector, int32 Corner)

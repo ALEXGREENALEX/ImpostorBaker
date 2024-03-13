@@ -55,12 +55,14 @@ private:
 		AddManager(ManagerClass::StaticClass());
 	}
 
+public:
 	template<typename Class>
 	Class* GetManager() const
 	{
 		return Cast<Class>(MappedManagers.FindRef(Class::StaticClass()->GetFName()));
 	}
 
+private:
 	void AddManager(const TSubclassOf<UImpostorBaseManager>& ManagerClass);
 
 public:

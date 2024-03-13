@@ -16,7 +16,7 @@ public:
 	static FVector GetGridVector(int32 X, int32 Y, int32 Size, EImpostorLayoutType Type);
 	static int32 GetImpostorTypeResolution(EImpostorLayoutType Type);
 
-	static int32 TraceUntilIntersection(int32 CornerPass, const FImpostorTextureData& TextureData, EImpostorLayoutType Type, int32 StartX, int32& OutX, int32& OutY);
+	static bool FindIntersection(int32 CornerPass, const FImpostorTextureData& TextureData, EImpostorLayoutType Type, int32 StartX, int32& OutX, int32& OutY);
 	static FVector2D GetRotatedCoordsByCorner(const FVector2D& XY, int32 Size, bool bVector, int32 Corner);
 	static void GetRotatedCoords(const FVector2D& XY, int32 Size, bool bVector, FVector2D& Out0, FVector2D& Out90, FVector2D& Out180, FVector2D& Out270);
 
