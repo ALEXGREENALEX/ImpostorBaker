@@ -114,6 +114,10 @@ void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMat
 	ProgressSlowTask("Adding impostor mesh as a LOD" + LexToString(ImpostorData->TargetLOD) + " to referenced mesh...", true);
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	UStaticMesh* Mesh = ImpostorData->ReferencedMesh;
+	if (!Mesh)
+	{
+		return;
+	}
 
 	FString AssetName = ImpostorData->NewMeshName;
 	FString PackageName = ImpostorData->GetPackage(AssetName);

@@ -156,7 +156,10 @@ void UImpostorData::UpdateMeshData(const FAssetData& MeshAssetData)
 	NewTextureName = "T_" + AssetName + "_Impostor";
 	NewMeshName = "SM_" + AssetName + "_Impostor";
 
-	TargetLOD = ReferencedMesh->GetNumLODs();
+	if (ReferencedMesh)
+	{
+		TargetLOD = ReferencedMesh->GetNumLODs();
+	}
 
 	UpdateFOVDistance();
 }
@@ -183,16 +186,43 @@ FString UImpostorData::GetPackage(const FString& AssetName)
 
 void UImpostorData::UpdateFOVDistance()
 {
+	if (!ReferencedMesh)
+	{
+		return;
+	}
+
 	if (PerspectiveCameraType == EImpostorPerspectiveCameraType::Both)
 	{
 		return;
 	}
 
+	const float Radius = ReferencedMesh->GetBounds().SphereRadius + GetMeshOffset().GetAbsMax();
+
 	if (PerspectiveCameraType == EImpostorPerspectiveCameraType::Distance)
 	{
-		CameraFOV = ((180.f / UE_DOUBLE_PI) * FMath::Atan(ReferencedMesh->GetBounds().SphereRadius / CameraDistance)) * 2.f;
+		CameraFOV = ((180.f / UE_DOUBLE_PI) * FMath::Atan(Radius / CameraDistance)) * 2.f;
 		return;
 	}
 
-	CameraDistance = ReferencedMesh->GetBounds().SphereRadius / FMath::Tan(CameraFOV / 2.f / (180.f / UE_DOUBLE_PI));
+	CameraDistance = Radius / FMath::Tan(CameraFOV / 2.f / (180.f / UE_DOUBLE_PI));
+}
+
+FVector2D UImpostorData::GetMeshOffset() const
+{
+	FVector2D Offset = FVector2D::ZeroVector;
+	switch (MeshOffsetType)
+	{
+	case EImpostorMeshOffsetType::MeshOrigin:
+	{
+		if (ReferencedMesh)
+		{
+			Offset = FVector2D(ReferencedMesh->GetBounds().Origin.X, ReferencedMesh->GetBounds().Origin.Y);
+		}
+		break;
+	}
+	case EImpostorMeshOffsetType::CustomOffset: Offset = CustomMeshOffset; break;
+	case EImpostorMeshOffsetType::None: break;
+	}
+
+	return Offset;
 }

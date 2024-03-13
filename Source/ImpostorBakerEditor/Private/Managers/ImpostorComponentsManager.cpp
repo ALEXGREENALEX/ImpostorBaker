@@ -33,8 +33,14 @@ void UImpostorComponentsManager::Update()
 void UImpostorComponentsManager::UpdateReferencedMeshData()
 {
 	ReferencedMeshComponent->SetStaticMesh(ImpostorData->ReferencedMesh);
+	if (!ImpostorData->ReferencedMesh)
+	{
+		return;
+	}
+
+	const FBoxSphereBounds& MeshBounds = ImpostorData->ReferencedMesh->GetBounds();
+	ReferencedMeshComponent->SetRelativeLocation(FVector(MeshBounds.SphereRadius * -2.25f, 0.f, MeshBounds.GetBox().GetExtent().Z - MeshBounds.Origin.Z));
 	ReferencedMeshComponent->SetForcedLodModel(0);
-	ReferencedMeshComponent->SetRelativeLocation(FVector(ReferencedMeshComponent->Bounds.SphereRadius * -2.25f, 0.f, 10.f));
 
 	TSet<FName> UnusedMaterials;
 	OverridenMeshMaterials.GetKeys(UnusedMaterials);
@@ -67,8 +73,8 @@ void UImpostorComponentsManager::UpdateReferencedMeshData()
 
 void UImpostorComponentsManager::UpdateComponentsData()
 {
-	ObjectRadius = ReferencedMeshComponent->Bounds.SphereRadius;
-	OffsetVector = ReferencedMeshComponent->Bounds.Origin - ReferencedMeshComponent->GetComponentLocation();
+	ObjectRadius = GetBounds().SphereRadius;
+	OffsetVector = GetBounds().Origin - ReferencedMeshComponent->GetComponentLocation();
 	DebugTexelSize = ObjectRadius / 16.f;
 
 	const FVector Scale(ObjectRadius / 256.f * 2.f, ObjectRadius / 256.f * 2.f, 0.05f);
@@ -158,7 +164,7 @@ void UImpostorComponentsManager::SetupPreviewMeshes()
 			const FVector& CaptureVector = ViewCaptureVectors[Index];
 
 			FTransform Transform = FTransform::Identity;
-			Transform.SetLocation(CaptureVector * (ObjectRadius * 1.1f * 1.1f) + OffsetVector + FVector(ReferencedMeshComponent->Bounds.SphereRadius * -2.25f, 0.f, 0.f));
+			Transform.SetLocation(CaptureVector * (ObjectRadius * 1.1f * 1.1f) + OffsetVector + FVector(GetBounds().SphereRadius * -2.25f, 0.f, 0.f));
 			Transform.SetRotation(FRotationMatrix::MakeFromYZ(CaptureVector.GetSafeNormal(), FVector::UpVector).ToQuat());
 
 			if (!VisualizedMeshes.IsValidIndex(Index))
@@ -199,6 +205,19 @@ void UImpostorComponentsManager::SetupPreviewMeshes()
 	const int32 TextureSizeX = ImpostorData->ImpostorType == EImpostorLayoutType::TraditionalBillboards ? NumHorizontalFrames * ImpostorData->FrameSize : ImpostorData->Resolution;
 	const int32 TextureSizeY = ImpostorData->ImpostorType == EImpostorLayoutType::TraditionalBillboards ? NumVerticalFrames * ImpostorData->FrameSize : ImpostorData->Resolution;
 	SetOverlayText("TextureSize", "Texture Size", LexToString(TextureSizeX) + "x" + LexToString(TextureSizeY));
+}
+
+FBoxSphereBounds UImpostorComponentsManager::GetBounds() const
+{
+	FBoxSphereBounds Bounds = ReferencedMeshComponent->Bounds;
+
+	const FVector2D Offset = ImpostorData->GetMeshOffset();
+	Bounds.Origin.X -= Offset.X;
+	Bounds.Origin.Y -= Offset.Y;
+
+	Bounds.SphereRadius += Offset.GetAbsMax();
+
+	return Bounds;
 }
 
 FVector2D UImpostorComponentsManager::GetRenderTargetSize() const

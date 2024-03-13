@@ -38,6 +38,14 @@ enum class EImpostorPerspectiveCameraType
 	Both UMETA(Tooltip = "Camera distance and the FOV will be custom")
 };
 
+UENUM()
+enum class EImpostorMeshOffsetType
+{
+	None UMETA(Tooltip = "Will not offset mesh and use its bounding box center"),
+	MeshOrigin UMETA(Tooltip = "Will offset mesh by its origin"),
+	CustomOffset UMETA(Tooltip = "Will offset mesh by custom offset")
+};
+
 UCLASS()
 class UImpostorData : public UObject
 {
@@ -269,6 +277,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Advanced")
 	bool bUseMeshCutout = true;
 
+	UPROPERTY(EditAnywhere, Category = "Advanced")
+	EImpostorMeshOffsetType MeshOffsetType = EImpostorMeshOffsetType::None;
+
+	UPROPERTY(EditAnywhere, Category = "Advanced", meta = (EditCondition = "MeshOffsetType == EImpostorMeshOffsetType::CustomOffset", EditConditionHides))
+	FVector2D CustomMeshOffset = FVector2D::ZeroVector;
+
 	// Allows higher quality silhouette blending as well as subsurface edge effects. Makes rendering take much longer.
 	UPROPERTY(EditAnywhere, Category = "Advanced")
 	bool bUseDistanceFieldAlpha = true;
@@ -289,9 +303,13 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Advanced", AdvancedDisplay)
 	int32 DFMipTarget = 8;
 
+	// Will display vertices with their data in viewport
 	UPROPERTY(VisibleAnywhere, Category = "Advanced", AdvancedDisplay)
 	bool bDisplayVertices = false;
 
 private:
 	bool bNeedUpdateCustomLightingBool = false;
+
+public:
+	FVector2D GetMeshOffset() const;
 };

@@ -25,6 +25,9 @@ private:
 	void SetupPreviewMeshes();
 
 public:
+	FBoxSphereBounds GetBounds() const;
+
+public:
 	FVector2D GetRenderTargetSize() const;
 
 public:

@@ -355,14 +355,23 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 
 		NewTexture->MarkPackageDirty();
 
-		NewTexture->CompressionSettings = TC_Default;
-		NewTexture->LODGroup = TargetMap == EImpostorBakeMapType::WorldNormal ? TEXTUREGROUP_WorldNormalMap : TEXTUREGROUP_World;
-		NewTexture->MipGenSettings = TMGS_FromTextureGroup;
-		NewTexture->SRGB = TargetMap == EImpostorBakeMapType::BaseColor;
-		NewTexture->PostEditChange();
-
 		if (bCreatingNewTexture)
 		{
+			NewTexture->MipGenSettings = TMGS_FromTextureGroup;
+			NewTexture->SRGB = TargetMap == EImpostorBakeMapType::BaseColor;
+
+			if (TargetMap == EImpostorBakeMapType::WorldNormal)
+			{
+				if (!ImpostorData->bCombineNormalAndDepth ||
+					!ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
+				{
+					NewTexture->LODGroup = TEXTUREGROUP_WorldNormalMap;
+					NewTexture->CompressionSettings = TC_Normalmap;
+				}
+			}
+
+			NewTexture->PostEditChange();
+
 			FAssetRegistryModule::AssetCreated(NewTexture);
 		}
 
@@ -457,7 +466,7 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 
 		ProgressSlowTask(Message, Index % ForceEvery == 0);
 
-		FVector WorldLocation = ComponentsManager->ReferencedMeshComponent->Bounds.Origin;
+		FVector WorldLocation = ComponentsManager->GetBounds().Origin;
 		WorldLocation += Vector * (ImpostorData->ProjectionType == ECameraProjectionMode::Type::Orthographic ? (ComponentsManager->ObjectRadius * 1.25f) : ImpostorData->CameraDistance);
 		SceneCaptureComponent2D->SetWorldLocation(WorldLocation);
 		SceneCaptureComponent2D->SetWorldRotation((Vector * -1.f).ToOrientationRotator());

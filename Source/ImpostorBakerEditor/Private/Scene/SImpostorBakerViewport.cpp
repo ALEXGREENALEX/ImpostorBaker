@@ -91,7 +91,10 @@ void SImpostorBakerViewport::PopulateOverlayText(const TMap<FName, FString>& Tex
 
 void SImpostorBakerViewport::UpdateCamera() const
 {
-	SystemViewportClient->UpdateCamera(Object->ReferencedMesh->GetBounds());
+	if (Object->ReferencedMesh)
+	{
+		SystemViewportClient->UpdateCamera(Object->ReferencedMesh->GetBounds());
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -102,7 +105,10 @@ TSharedRef<FEditorViewportClient> SImpostorBakerViewport::MakeEditorViewportClie
 {
 	SystemViewportClient = MakeShared<FImpostorBakerViewportClient>(*AdvancedPreviewScene.Get(), SharedThis(this));
 	SystemViewportClient->SetRealtime(true);
-	SystemViewportClient->UpdateCamera(Object->ReferencedMesh->GetBounds());
+	if (Object->ReferencedMesh)
+	{
+		SystemViewportClient->UpdateCamera(Object->ReferencedMesh->GetBounds());
+	}
 
 	return SystemViewportClient.ToSharedRef();
 }

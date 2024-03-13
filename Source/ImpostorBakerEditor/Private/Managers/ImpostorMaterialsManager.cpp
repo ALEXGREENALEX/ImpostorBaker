@@ -193,7 +193,7 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 			return nullptr;
 		}
 
-		TArray<UObject*> ObjectsToSync{NewMaterial};
+		const TArray<UObject*> ObjectsToSync{ NewMaterial };
 		GEditor->SyncBrowserToObjects(ObjectsToSync);
 	}
 	else
@@ -362,7 +362,7 @@ void UImpostorMaterialsManager::UpdateDepthMaterial() const
 		return;
 	}
 
-	DepthMaterial->SetVectorParameterValue(FName("Origin"), GetManager<UImpostorComponentsManager>()->ReferencedMeshComponent->Bounds.Origin);
+	DepthMaterial->SetVectorParameterValue(FName("Origin"), GetManager<UImpostorComponentsManager>()->GetBounds().Origin);
 	DepthMaterial->SetScalarParameterValue(FName("Radius"), GetManager<UImpostorComponentsManager>()->ObjectRadius);
 }
 
