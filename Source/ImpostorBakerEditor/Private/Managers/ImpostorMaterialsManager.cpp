@@ -121,13 +121,31 @@ UMaterialInstanceDynamic* UImpostorMaterialsManager::GetSampleMaterial(const EIm
 
 	SampleFrameMaterial->SetScalarParameterValue("UseSRGBBaseColor", TargetMap == EImpostorBakeMapType::BaseColor ? 1.f : 0.f);
 
-	if (ImpostorData->bUseDistanceFieldAlpha &&
-		(TargetMap == EImpostorBakeMapType::BaseColor))
+	if (TargetMap == EImpostorBakeMapType::BaseColor)
 	{
-		SampleFrameMaterial->SetScalarParameterValue("UseDistanceField", 1.f);
+		if (ImpostorData->bUseDistanceFieldAlpha)
+		{
+			SampleFrameMaterial->SetScalarParameterValue("UseDistanceField", 1.f);
+		}
+		else
+		{
+			SampleFrameMaterial->SetScalarParameterValue("UseDistanceField", 0.f);
+		}
+
+		SampleFrameMaterial->SetScalarParameterValue(FName("Dilation"), ImpostorData->bEnableDilation ? 1.f : 0.f);
+		if (ImpostorData->bOverrideDilationSteps)
+		{
+			SampleFrameMaterial->SetScalarParameterValue(FName("DilationMaxSteps"), ImpostorData->DilationMaxSteps);
+		}
+		else
+		{
+			const int32 DilationSteps = 1 << FMath::Max(int32(FMath::CeilLogTwo(ImpostorData->FrameSize)) - 7, 0);
+			SampleFrameMaterial->SetScalarParameterValue(FName("DilationMaxSteps"), DilationSteps);
+		}
 	}
 	else
 	{
+		SampleFrameMaterial->SetScalarParameterValue(FName("Dilation"), 0.f);
 		SampleFrameMaterial->SetScalarParameterValue("UseDistanceField", 0.f);
 	}
 
@@ -307,8 +325,6 @@ void UImpostorMaterialsManager::UpdateSampleFrameMaterial() const
 	SampleFrameMaterial->SetTextureParameterValue(FName("Alpha"), GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain[0]);
 	SampleFrameMaterial->SetTextureParameterValue(FName("MipAlpha"), GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain[FMath::Min(GetManager<UImpostorRenderTargetsManager>()->SceneCaptureMipChain.Num() - 1, ImpostorData->DFMipTarget)]);
 	SampleFrameMaterial->SetScalarParameterValue(FName("TextureSize"), ImpostorData->SceneCaptureResolution);
-	SampleFrameMaterial->SetScalarParameterValue(FName("Dilation"), ImpostorData->Dilation);
-	SampleFrameMaterial->SetScalarParameterValue(FName("DilationMaxSteps"), ImpostorData->DilationMaxSteps);
 }
 
 void UImpostorMaterialsManager::UpdateAddAlphasMaterial() const

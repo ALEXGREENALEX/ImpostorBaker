@@ -225,10 +225,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Material")
 	float PixelDepthOffset = 0.f;
 
-	UPROPERTY(EditAnywhere, Category = "Material", meta = (ClampMin = "0", ClampMax = "1"))
-	float Dilation = 0.f;
+	UPROPERTY(EditAnywhere, Category = "Material")
+	bool bEnableDilation = false;
 
-	UPROPERTY(EditAnywhere, Category = "Material", meta = (ClampMin = "1"))
+	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "bEnableDilation"))
+	bool bOverrideDilationSteps = false;
+
+	UPROPERTY(EditAnywhere, Category = "Material", meta = (EditCondition = "bEnableDilation && bOverrideDilationSteps", ClampMin = "1"))
 	int32 DilationMaxSteps = 64;
 
 	UPROPERTY(EditAnywhere, Category = "Custom Lighting")

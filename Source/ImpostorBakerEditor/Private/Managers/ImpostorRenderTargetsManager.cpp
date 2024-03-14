@@ -476,14 +476,18 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 		SceneWorld->SendAllEndOfFrameUpdates();
 		SceneCaptureComponent2D->UpdateSceneCaptureContents(SceneWorld->Scene);
 
-		if (ImpostorData->bUseDistanceFieldAlpha &&
-			CurrentMap == EImpostorBakeMapType::BaseColor &&
-			bCapturingFinalColor)
+		// Lower mips are necessary for distance field alpha and mesh cutouts
+		if (ImpostorData->bUseDistanceFieldAlpha ||
+			ImpostorData->bUseMeshCutout)
 		{
-			for (int32 MipIndex = 1; MipIndex < SceneCaptureMipChain.Num(); MipIndex++)
+			if (CurrentMap == EImpostorBakeMapType::BaseColor &&
+				bCapturingFinalColor)
 			{
-				UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, SceneCaptureMipChain[MipIndex], FLinearColor::Black);
-				ResampleRenderTarget(SceneCaptureMipChain[MipIndex - 1], SceneCaptureMipChain[MipIndex]);
+				for (int32 MipIndex = 1; MipIndex < SceneCaptureMipChain.Num(); MipIndex++)
+				{
+					UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, SceneCaptureMipChain[MipIndex], FLinearColor::Black);
+					ResampleRenderTarget(SceneCaptureMipChain[MipIndex - 1], SceneCaptureMipChain[MipIndex]);
+				}
 			}
 		}
 
