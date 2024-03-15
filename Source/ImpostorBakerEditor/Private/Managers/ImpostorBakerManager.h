@@ -75,7 +75,7 @@ public:
 	UPROPERTY(Transient)
 	TObjectPtr<USkyLightComponent> SkyLight;
 
-	UPROPERTY(VisibleAnywhere, Transient, Instanced)
+	UPROPERTY(Category = "Config", VisibleAnywhere, Transient, Instanced)
 	TArray<TObjectPtr<UImpostorBaseManager>> Managers;
 
 private:

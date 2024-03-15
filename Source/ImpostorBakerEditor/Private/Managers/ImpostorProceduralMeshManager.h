@@ -15,10 +15,10 @@ struct FImpostorTextureData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(Category = "Config", VisibleAnywhere, Transient)
 	int32 SizeX = 0;
 
-	UPROPERTY(VisibleAnywhere, Transient)
+	UPROPERTY(Category = "Config", VisibleAnywhere, Transient)
 	int32 SizeY = 0;
 
 	UPROPERTY(Transient)
@@ -41,10 +41,10 @@ struct FImpostorPoints
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = "Config", VisibleAnywhere)
 	TArray<FVector2D> Points;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(Category = "Config", VisibleAnywhere)
 	TMap<FVector2D, FVector> PointToVertex;
 };
 
