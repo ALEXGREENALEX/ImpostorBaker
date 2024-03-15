@@ -177,7 +177,14 @@ UMaterialInterface* UImpostorData::GetMaterial() const
 
 FString UImpostorData::GetPackage(const FString& AssetName)
 {
-	return FPaths::Combine(SaveLocation.Path, AssetName);
+	if (SaveLocation.Path.EndsWith("/"))
+	{
+		return FPaths::Combine(SaveLocation.Path, AssetName);
+	}
+	else
+	{
+		return FPaths::Combine(SaveLocation.Path, "/", AssetName);
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

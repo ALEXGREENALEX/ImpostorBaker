@@ -369,12 +369,17 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 					NewTexture->CompressionSettings = TC_Normalmap;
 				}
 			}
-
-			NewTexture->PostEditChange();
-
-			FAssetRegistryModule::AssetCreated(NewTexture);
 		}
 
+		NewTexture->Modify();
+		NewTexture->MarkPackageDirty();
+		NewTexture->PostEditChange();
+		NewTexture->UpdateResource();
+
+		if (bCreatingNewTexture)
+		{
+			FAssetRegistryModule::AssetCreated(NewTexture);
+		}
 		NewTextures.Add(TargetMap, NewTexture);
 	}
 
