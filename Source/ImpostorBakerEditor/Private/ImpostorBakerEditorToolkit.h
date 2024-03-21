@@ -57,7 +57,7 @@ private:
 	static constexpr const TCHAR* TransientDetailsTabId = TEXT("FBuildingObjectEditorToolkit_TransientDetails");
 	static constexpr const TCHAR* GlobalSettingsTabId = TEXT("FBuildingObjectEditorToolkit_GlobalSettings");
 
-	UImpostorData* ObjectBeingEdited = nullptr;
+	TObjectPtr<UImpostorData> ObjectBeingEdited = nullptr;
 	TArray<FName> RegisteredTabIds;
 
 	TSharedPtr<IDetailsView> DetailsView;

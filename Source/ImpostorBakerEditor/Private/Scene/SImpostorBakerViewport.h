@@ -78,7 +78,7 @@ private:
 	TSharedPtr<FImpostorBakerViewportClient> SystemViewportClient;
 	TSharedPtr<SRichTextBlock> OverlayText;
 
-	UImpostorBakerManager* BakerManager = nullptr;
-	UImpostorData* Object = nullptr;
+	TObjectPtr<UImpostorBakerManager> BakerManager = nullptr;
+	TObjectPtr<UImpostorData> Object = nullptr;
 	bool bIsTickForced = false;
 };
