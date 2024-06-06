@@ -45,71 +45,25 @@ void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMate
 		return;
 	}
 
-	const FString AssetName = ImpostorData->NewMeshName;
-	const FString PackageName = ImpostorData->GetPackage(AssetName);
+	const FString& AssetName = ImpostorData->NewMeshName;
+	const FString PackageName = ImpostorData->GetPackageName(AssetName);
 
-	UPackage* Package = CreatePackage(*PackageName);
-	if (!ensure(Package))
+	UPackage* StaticMeshPackage = CreatePackage(*PackageName);
+	if (!ensure(StaticMeshPackage))
 	{
 		return;
 	}
 
-	UStaticMesh* NewMesh = FindObject<UStaticMesh>(Package, *AssetName);
+	// Make sure the destination package is loaded
+	StaticMeshPackage->FullyLoad();
+
+	UStaticMesh* NewMesh = CreateMesh(NewMaterial, StaticMeshPackage, AssetName);
 	if (NewMesh)
 	{
-		FMeshDescription MeshDescription = BuildMeshDescription(MeshComponent);
+		NewMesh->MarkPackageDirty();
 
-		if (!ensure(MeshDescription.Polygons().Num() > 0))
-		{
-			return;
-		}
-
-		{
-			FStaticMeshSourceModel& SrcModel = NewMesh->GetSourceModel(0);
-			SrcModel.BuildSettings.bRecomputeNormals = false;
-			SrcModel.BuildSettings.bRecomputeTangents = false;
-			SrcModel.BuildSettings.bRemoveDegenerates = false;
-			SrcModel.BuildSettings.bUseHighPrecisionTangentBasis = false;
-			SrcModel.BuildSettings.bUseFullPrecisionUVs = false;
-			SrcModel.BuildSettings.bGenerateLightmapUVs = true;
-			SrcModel.BuildSettings.SrcLightmapIndex = 0;
-			SrcModel.BuildSettings.DstLightmapIndex = 1;
-			NewMesh->CreateMeshDescription(0, MoveTemp(MeshDescription));
-			NewMesh->CommitMeshDescription(0);
-		}
-
-		if (!MeshComponent->bUseComplexAsSimpleCollision)
-		{
-			UBodySetup* NewBodySetup = NewMesh->GetBodySetup();
-			NewBodySetup->BodySetupGuid = FGuid::NewGuid();
-			NewBodySetup->AggGeom.ConvexElems = MeshComponent->ProcMeshBodySetup->AggGeom.ConvexElems;
-			NewBodySetup->bGenerateMirroredCollision = false;
-			NewBodySetup->bDoubleSidedGeometry = true;
-			NewBodySetup->CollisionTraceFlag = CTF_UseDefault;
-			NewBodySetup->CreatePhysicsMeshes();
-		}
-
-		const int32 NumSections = NewMesh->GetNumSections(0);
-		for (int32 SectionIndex = 0; SectionIndex < NumSections; SectionIndex++)
-		{
-			FMeshSectionInfo SectionInfo = NewMesh->GetSectionInfoMap().Get(0, SectionIndex);
-			SectionInfo.bCastShadow = ImpostorData->bMeshCastShadow;
-			NewMesh->GetSectionInfoMap().Set(0, SectionIndex, SectionInfo);
-		}
-
-		NewMesh->Build(false);
-		return;
+		FAssetRegistryModule::AssetCreated(NewMesh);
 	}
-
-	NewMesh = CreateMesh(NewMaterial, Package, AssetName);
-	if (!ensure(NewMesh))
-	{
-		return;
-	}
-
-	NewMesh->MarkPackageDirty();
-
-	FAssetRegistryModule::AssetCreated(NewMesh);
 }
 
 void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMaterial) const
@@ -123,7 +77,7 @@ void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMat
 	}
 
 	FString AssetName = ImpostorData->NewMeshName;
-	FString PackageName = ImpostorData->GetPackage(AssetName);
+	FString PackageName = ImpostorData->GetPackageName(AssetName);
 	AssetTools.CreateUniqueAssetName(PackageName, "", PackageName, AssetName);
 
 	const UStaticMesh* NewMesh = CreateMesh(NewMaterial, Mesh, AssetName);
@@ -216,6 +170,7 @@ UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstan
 		NewBodySetup->CreatePhysicsMeshes();
 	}
 
+	if (IsValid(NewMaterial))
 	{
 		const int32 NumSections = MeshComponent->GetNumSections();
 		for (int32 SectionIdx = 0; SectionIdx < NumSections; SectionIdx++)
@@ -236,6 +191,23 @@ UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstan
 
 	NewMesh->Build(false);
 	NewMesh->PostEditChange();
+
+	// Copy bounds from original mesh (prevent Flickering, Culling etc...)
+	const UStaticMesh* ReferencedMesh = IsValid(ImpostorData) ? ImpostorData->ReferencedMesh : nullptr;
+	if (IsValid(ReferencedMesh))
+	{
+		if (const FStaticMeshRenderData* RenderData = ReferencedMesh->GetRenderData())
+		{
+			NewMesh->SetExtendedBounds(RenderData->Bounds);
+		}
+	}
+
+	// Set PreviewMesh for Material Instance
+	if (IsValid(NewMaterial))
+	{
+		NewMaterial->PreviewMesh = NewMesh->GetPathName();
+		NewMaterial->MarkPackageDirty();
+	}
 
 	return NewMesh;
 }

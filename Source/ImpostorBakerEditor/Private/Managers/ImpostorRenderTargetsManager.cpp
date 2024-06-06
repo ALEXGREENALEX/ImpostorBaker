@@ -335,10 +335,18 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 		}
 
 		FString AssetName = ImpostorData->NewTextureName + "_" + GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[TargetMap].ToString();
-		FString PackageName = ImpostorData->GetPackage(AssetName);
+		FString PackageName = ImpostorData->GetPackageName(AssetName);
+
+		UPackage* TexturePackage = CreatePackage(*PackageName);
+		if (!ensure(TexturePackage))
+		{
+			continue;
+		}
+
+		TexturePackage->FullyLoad(); // Make sure the destination package is loaded
 
 		bool bCreatingNewTexture = false;
-		UTexture2D* NewTexture = FindObject<UTexture2D>(CreatePackage(*PackageName), *AssetName);
+		UTexture2D* NewTexture = FindObject<UTexture2D>(TexturePackage, *AssetName);
 		if (NewTexture)
 		{
 			RenderTarget->UpdateTexture(NewTexture, static_cast<EConstructTextureFlags>(CTF_Default | CTF_AllowMips));
@@ -346,7 +354,7 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 		else
 		{
 			bCreatingNewTexture = true;
-			NewTexture = RenderTarget->ConstructTexture2D(CreatePackage(*PackageName), AssetName, RenderTarget->GetMaskedFlags() | RF_Public | RF_Standalone, CTF_Default | CTF_AllowMips, nullptr);
+			NewTexture = RenderTarget->ConstructTexture2D(TexturePackage, AssetName, RenderTarget->GetMaskedFlags() | RF_Public | RF_Standalone, CTF_Default | CTF_AllowMips, nullptr);
 		}
 
 		if (!ensure(NewTexture))
@@ -354,7 +362,7 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 			continue;
 		}
 
-		NewTexture->MarkPackageDirty();
+		NewTexture->PreEditChange(nullptr);
 
 		if (bCreatingNewTexture)
 		{
@@ -372,10 +380,9 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 			}
 		}
 
-		NewTexture->Modify();
-		NewTexture->MarkPackageDirty();
-		NewTexture->PostEditChange();
 		NewTexture->UpdateResource();
+		NewTexture->PostEditChange();
+		NewTexture->MarkPackageDirty();
 
 		if (bCreatingNewTexture)
 		{

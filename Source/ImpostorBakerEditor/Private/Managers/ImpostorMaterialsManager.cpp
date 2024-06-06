@@ -197,12 +197,20 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	const UImpostorBakerSettings* Settings = GetDefault<UImpostorBakerSettings>();
 
 	const FString AssetName = ImpostorData->NewMaterialName;
-	const FString PackageName = ImpostorData->GetPackage(AssetName);
+	const FString PackageName = ImpostorData->GetPackageName(AssetName);
+	UPackage* MaterialInstancePackage = CreatePackage(*PackageName);
+	if (!ensure(MaterialInstancePackage))
+	{
+		return nullptr;
+	}
+
+	// Make sure the destination package is loaded
+	MaterialInstancePackage->FullyLoad();
 
 	TOptional<FMaterialUpdateContext> MaterialUpdateContext;
 	MaterialUpdateContext.Emplace(FMaterialUpdateContext::EOptions::Default & ~FMaterialUpdateContext::EOptions::RecreateRenderStates);
 
-	UMaterialInstanceConstant* NewMaterial = FindObject<UMaterialInstanceConstant>(CreatePackage(*PackageName), *AssetName);
+	UMaterialInstanceConstant* NewMaterial = FindObject<UMaterialInstanceConstant>(MaterialInstancePackage, *AssetName);
 	if (!NewMaterial)
 	{
 		UMaterialInstanceConstantFactoryNew* Factory = NewObject<UMaterialInstanceConstantFactoryNew>();
@@ -256,8 +264,9 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 		NewMaterial->SetTextureParameterValueEditorOnly(Settings->ImpostorPreviewMapNames[It.Key], It.Value);
 	}
 
-	NewMaterial->PostEditChange();
 	NewMaterial->UpdateCachedData();
+	NewMaterial->PostEditChange();
+	NewMaterial->MarkPackageDirty();
 
 	return NewMaterial;
 }

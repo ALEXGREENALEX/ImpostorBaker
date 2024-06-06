@@ -180,7 +180,7 @@ UMaterialInterface* UImpostorData::GetMaterial() const
 	}
 }
 
-FString UImpostorData::GetPackage(const FString& AssetName) const
+FString UImpostorData::GetPackageName(const FString& AssetName) const
 {
 	return UPackageTools::SanitizePackageName(SaveLocation.Path / AssetName);
 }

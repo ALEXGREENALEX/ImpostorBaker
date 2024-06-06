@@ -71,7 +71,7 @@ public:
 	void UpdateMeshData(const FAssetData& MeshAssetData);
 	UMaterialInterface* GetMaterial() const;
 
-	FString GetPackage(const FString& AssetName);
+	FString GetPackageName(const FString& AssetName) const;
 
 private:
 	void UpdateFOVDistance();
