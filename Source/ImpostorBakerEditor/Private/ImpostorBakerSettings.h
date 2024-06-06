@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include <CoreMinimal.h>
+#include <Engine/DeveloperSettings.h>
+#include <Materials/MaterialInterface.h>
 #include "ImpostorData.h"
-#include "Engine/DeveloperSettings.h"
 #include "ImpostorBakerSettings.generated.h"
 
 UCLASS(Config = ImpostorBaker, DefaultConfig, meta = (DisplayName = "Impostor Baker"))

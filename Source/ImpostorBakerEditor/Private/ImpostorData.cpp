@@ -1,7 +1,12 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorData.h"
+#include <AssetRegistry/AssetData.h>
+#include <Engine/StaticMesh.h>
+#include <PackageTools.h>
 #include "ImpostorBakerSettings.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorData)
 
 void UImpostorData::PreEditChange(FProperty* PropertyAboutToChange)
 {
@@ -16,7 +21,7 @@ void UImpostorData::PreEditChange(FProperty* PropertyAboutToChange)
 			if (MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
 				MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
 			{
-				bNeedUpdateCustomLightingBool = true;			
+				bNeedUpdateCustomLightingBool = true;
 			}
 		}
 		else
@@ -24,7 +29,7 @@ void UImpostorData::PreEditChange(FProperty* PropertyAboutToChange)
 			if (!MapsToRender.Contains(EImpostorBakeMapType::BaseColor) ||
 				!MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
 			{
-				bNeedUpdateCustomLightingBool = true;			
+				bNeedUpdateCustomLightingBool = true;
 			}
 		}
 	}

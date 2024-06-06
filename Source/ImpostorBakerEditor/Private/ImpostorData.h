@@ -2,8 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include <CoreMinimal.h>
+#include <Camera/CameraTypes.h>
+#include <Misc/EnumRange.h>
+#include <UObject/Object.h>
 #include "ImpostorData.generated.h"
 
 UENUM()
@@ -269,7 +271,7 @@ public:
 
 	// Orthographic is the most accurate, but some shader effects require a perspective view. The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
 	UPROPERTY(EditAnywhere, Category = "Projection")
-	TEnumAsByte<ECameraProjectionMode::Type> ProjectionType = ECameraProjectionMode::Type::Perspective;
+	TEnumAsByte<ECameraProjectionMode::Type> ProjectionType = ECameraProjectionMode::Perspective;
 
 	UPROPERTY(EditAnywhere, Category = "Projection", meta = (EditCondition = "ProjectionType == ECameraProjectionMode::Perspective", EditConditionHides))
 	EImpostorPerspectiveCameraType PerspectiveCameraType = EImpostorPerspectiveCameraType::FOV;

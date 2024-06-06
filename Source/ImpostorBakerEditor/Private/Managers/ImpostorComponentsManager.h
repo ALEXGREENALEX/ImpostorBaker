@@ -2,9 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include <CoreMinimal.h>
 #include "ImpostorBaseManager.h"
 #include "ImpostorComponentsManager.generated.h"
+
+class UMaterialInstanceDynamic;
+class UStaticMeshComponent;
 
 UCLASS()
 class IMPOSTORBAKEREDITOR_API UImpostorComponentsManager : public UImpostorBaseManager

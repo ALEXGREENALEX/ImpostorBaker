@@ -1,10 +1,15 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorComponentsManager.h"
+#include <Components/StaticMeshComponent.h>
+#include <Engine/StaticMesh.h>
+#include <Materials/MaterialInstanceDynamic.h>
+#include <UObject/Package.h>
 #include "ImpostorData.h"
 #include "ImpostorBakerUtilities.h"
 #include "ImpostorLightingManager.h"
-#include "Materials/MaterialInstanceDynamic.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorComponentsManager)
 
 void UImpostorComponentsManager::Initialize()
 {

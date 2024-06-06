@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "SCommonEditorViewportToolbarBase.h"
+#include <CoreMinimal.h>
+#include <SCommonEditorViewportToolbarBase.h>
 
 class SImpostorBakerViewport;
 

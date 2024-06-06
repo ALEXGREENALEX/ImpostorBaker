@@ -8,12 +8,12 @@ class FAssetTypeActions_ImpostorSettings;
 class FImpostorBakerEditorModule : public IModuleInterface
 {
 public:
-    //~ Begin IModuleInterface Interface
-    virtual void StartupModule() override;
-    virtual void ShutdownModule() override;
-    //~ End IModuleInterface Interface
+	//~ Begin IModuleInterface Interface
+	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
+	//~ End IModuleInterface Interface
 
 private:
-    FDelegateHandle ContentBrowserAssetsExtenderDelegateHandle;
-    TSharedPtr<FAssetTypeActions_ImpostorSettings> AssetTypeAction;
+	FDelegateHandle ContentBrowserAssetsExtenderDelegateHandle;
+	TSharedPtr<FAssetTypeActions_ImpostorSettings> AssetTypeAction;
 };

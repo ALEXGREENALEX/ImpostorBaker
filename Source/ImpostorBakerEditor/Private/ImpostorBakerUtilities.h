@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include <CoreMinimal.h>
 
 struct FImpostorTextureData;
 enum class EImpostorLayoutType;

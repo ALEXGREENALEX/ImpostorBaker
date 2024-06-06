@@ -1,21 +1,24 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorProceduralMeshManager.h"
-
+#include <AssetRegistry/AssetRegistryModule.h>
+#include <AssetToolsModule.h>
+#include <Engine/StaticMesh.h>
+#include <Engine/TextureRenderTarget2D.h>
+#include <Materials/MaterialInstanceConstant.h>
+#include <Materials/MaterialInstanceDynamic.h>
+#include <MeshDescription.h>
+#include <PhysicsEngine/BodySetup.h>
+#include <ProceduralMeshComponent.h>
+#include <ProceduralMeshConversion.h>
+#include <StaticMeshResources.h>
+#include <TextureResource.h>
 #include "ImpostorBakerUtilities.h"
-#include "ImpostorMaterialsManager.h"
 #include "ImpostorComponentsManager.h"
+#include "ImpostorMaterialsManager.h"
 #include "ImpostorRenderTargetsManager.h"
 
-#include "MeshDescription.h"
-#include "AssetToolsModule.h"
-#include "ProceduralMeshComponent.h"
-#include "PhysicsEngine/BodySetup.h"
-#include "ProceduralMeshConversion.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "Materials/MaterialInstanceDynamic.h"
-#include "Materials/MaterialInstanceConstant.h"
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorProceduralMeshManager)
 
 void UImpostorProceduralMeshManager::Initialize()
 {

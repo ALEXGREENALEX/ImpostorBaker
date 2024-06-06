@@ -2,13 +2,16 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include <CoreMinimal.h>
+#include <Components/SceneComponent.h>
+#include <FeedbackContextEditor.h>
+#include <UObject/Object.h>
 #include "ImpostorBakerManager.h"
-#include "FeedbackContextEditor.h"
 #include "ImpostorBaseManager.generated.h"
 
 #define IMPOSTOR_GET_PROPERTY_CHANGE_DELEGATE(Property, ...) ImpostorData->OnPropertyInteractiveChange.FindOrAdd(GET_MEMBER_NAME_CHECKED(UImpostorData, Property), {}) \
+
+struct FScopedSlowTask;
 
 // We do need to force the UI refresh more frequently than usual slow task updates
 struct FImpostorFeedbackContextEditor final : FFeedbackContextEditor

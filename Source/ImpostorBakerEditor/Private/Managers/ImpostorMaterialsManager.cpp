@@ -1,17 +1,21 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorMaterialsManager.h"
-
+#include <AssetToolsModule.h>
+#include <Editor.h>
+#include <Engine/Texture2D.h>
+#include <Engine/TextureRenderTarget2D.h>
+#include <Factories/MaterialInstanceConstantFactoryNew.h>
+#include <MaterialShared.h>
+#include <Materials/Material.h>
+#include <Materials/MaterialInstanceConstant.h>
+#include <Materials/MaterialInstanceDynamic.h>
 #include "ImpostorBakerSettings.h"
 #include "ImpostorBakerUtilities.h"
 #include "ImpostorComponentsManager.h"
 #include "ImpostorRenderTargetsManager.h"
 
-#include "AssetToolsModule.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "Materials/MaterialInstanceDynamic.h"
-#include "Materials/MaterialInstanceConstant.h"
-#include "Factories/MaterialInstanceConstantFactoryNew.h"
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorMaterialsManager)
 
 void UImpostorMaterialsManager::Initialize()
 {

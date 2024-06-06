@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Misc/NotifyHook.h"
-#include "EditorUndoClient.h"
+#include <CoreMinimal.h>
+#include <EditorUndoClient.h>
+#include <Misc/NotifyHook.h>
+#include <Toolkits/AssetEditorToolkit.h>
 
 class UImpostorData;
 class SImpostorBakerViewport;

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "ThumbnailRendering/StaticMeshThumbnailRenderer.h"
+#include <CoreMinimal.h>
+#include <ThumbnailRendering/StaticMeshThumbnailRenderer.h>
 #include "ImpostorDataThumbnailRenderer.generated.h"
 
 class FStaticMeshThumbnailScene;

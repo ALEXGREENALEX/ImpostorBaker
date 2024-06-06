@@ -6,8 +6,9 @@
 #include "ImpostorBaseManager.h"
 #include "ImpostorProceduralMeshManager.generated.h"
 
-class UProceduralMeshComponent;
 class UMaterialInstanceConstant;
+class UProceduralMeshComponent;
+class UStaticMesh;
 struct FProcMeshTangent;
 
 USTRUCT()

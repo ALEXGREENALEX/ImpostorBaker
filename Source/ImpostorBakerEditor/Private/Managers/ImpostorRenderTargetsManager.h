@@ -2,11 +2,14 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include <CoreMinimal.h>
+#include <SceneView.h>
+#include <SceneViewExtension.h>
 #include "ImpostorData.h"
-#include "SceneViewExtension.h"
 #include "ImpostorBaseManager.h"
 #include "ImpostorRenderTargetsManager.generated.h"
+
+class UTextureRenderTarget2D;
 
 struct FLightingViewExtension final : FSceneViewExtensionBase
 {
@@ -20,6 +23,7 @@ struct FLightingViewExtension final : FSceneViewExtensionBase
 	virtual void SetupViewFamily(FSceneViewFamily& InViewFamily) override
 	{
 	}
+
 	virtual void SetupView(FSceneViewFamily& InViewFamily, FSceneView& InView) override
 	{
 		InView.DiffuseOverrideParameter = FVector4f(GEngine->LightingOnlyBrightness.R, GEngine->LightingOnlyBrightness.G, GEngine->LightingOnlyBrightness.B, 0.0f);

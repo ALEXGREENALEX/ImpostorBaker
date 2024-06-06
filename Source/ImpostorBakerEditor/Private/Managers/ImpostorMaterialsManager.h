@@ -7,6 +7,8 @@
 #include "ImpostorMaterialsManager.generated.h"
 
 class UMaterialInstanceConstant;
+class UMaterialInstanceDynamic;
+
 enum class EImpostorBakeMapType;
 
 UCLASS()

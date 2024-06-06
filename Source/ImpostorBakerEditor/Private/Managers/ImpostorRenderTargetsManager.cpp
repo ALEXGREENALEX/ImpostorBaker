@@ -1,19 +1,22 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorRenderTargetsManager.h"
-
+#include <AssetRegistry/AssetRegistryModule.h>
+#include <Components/SceneCaptureComponent2D.h>
+#include <Components/StaticMeshComponent.h>
+#include <Engine/Canvas.h>
+#include <Engine/Texture2D.h>
+#include <Engine/TextureRenderTarget2D.h>
+#include <Kismet/KismetRenderingLibrary.h>
+#include <Materials/MaterialInstanceDynamic.h>
+#include <UObject/Package.h>
 #include "ImpostorBakerSettings.h"
 #include "ImpostorBakerUtilities.h"
 #include "ImpostorMaterialsManager.h"
 #include "ImpostorComponentsManager.h"
 #include "ImpostorProceduralMeshManager.h"
 
-#include "Engine/Canvas.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "Kismet/KismetRenderingLibrary.h"
-#include "AssetRegistry/AssetRegistryModule.h"
-#include "Materials/MaterialInstanceDynamic.h"
-#include "Components/SceneCaptureComponent2D.h"
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorRenderTargetsManager)
 
 void UImpostorRenderTargetsManager::Initialize()
 {

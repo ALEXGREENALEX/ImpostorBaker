@@ -1,6 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorBakerEditorToolkit.h"
+#include <PropertyEditorModule.h>
+#include <Widgets/Docking/SDockTab.h>
 #include "ImpostorData.h"
 #include "ImpostorBakerSettings.h"
 #include "Scene/SImpostorBakerViewport.h"

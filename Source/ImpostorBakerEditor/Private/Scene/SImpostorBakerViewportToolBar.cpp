@@ -1,9 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SImpostorBakerViewportToolBar.h"
-
-#include "BufferVisualizationMenuCommands.h"
-#include "SEditorViewport.h"
+#include <BufferVisualizationMenuCommands.h>
+#include <SEditorViewport.h>
 
 void SImpostorBakerViewportToolBar::Construct(const FArguments& InArgs, const TSharedPtr<ICommonEditorViewportToolbarInfoProvider>& InViewport)
 {

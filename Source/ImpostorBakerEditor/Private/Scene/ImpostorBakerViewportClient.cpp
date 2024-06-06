@@ -1,13 +1,14 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorBakerViewportClient.h"
-#include "CanvasItem.h"
-#include "Engine/Font.h"
-#include "CanvasTypes.h"
+#include <AdvancedPreviewScene.h>
+#include <CanvasItem.h>
+#include <CanvasTypes.h>
+#include <Engine/Font.h>
+#include <ProceduralMeshComponent.h>
+#include <SceneView.h>
 #include "ImpostorData.h"
-#include "AdvancedPreviewScene.h"
 #include "SImpostorBakerViewport.h"
-#include "ProceduralMeshComponent.h"
 #include "Managers/ImpostorBakerManager.h"
 #include "Managers/ImpostorProceduralMeshManager.h"
 
@@ -100,7 +101,7 @@ void FImpostorBakerViewportClient::DrawCanvas(FViewport& InViewport, FSceneView&
 				const int32 StringHeight = GEngine->GetSmallFont()->GetStringHeightSize(*Text);
 				FCanvasTextItem TextItem(FVector2D(XPos - StringWidth, YPos - StringHeight), FText::FromString(Text), GEngine->GetSmallFont(), FLinearColor::White);
 				TextItem.EnableShadow(FLinearColor::Black);
-				Canvas.DrawItem(TextItem);	
+				Canvas.DrawItem(TextItem);
 			}
 		}
 	}

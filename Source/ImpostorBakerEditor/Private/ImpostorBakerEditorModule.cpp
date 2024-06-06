@@ -1,13 +1,12 @@
 ﻿#include "ImpostorBakerEditorModule.h"
-
+#include <AssetToolsModule.h>
+#include <ContentBrowserModule.h>
+#include <PropertyEditorModule.h>
+#include "AssetTypeActions_ImpostorSettings.h"
+#include "Customizations/ImpostorBakerManagerCustomization.h"
+#include "Customizations/ImpostorDataCustomization.h"
 #include "ImpostorDataThumbnailRenderer.h"
 #include "Managers/ImpostorBakerManager.h"
-#include "AssetTypeActions_ImpostorSettings.h"
-#include "Customizations/ImpostorDataCustomization.h"
-#include "Customizations/ImpostorBakerManagerCustomization.h"
-
-#include "AssetToolsModule.h"
-#include "ContentBrowserModule.h"
 
 void FImpostorBakerEditorModule::StartupModule()
 {

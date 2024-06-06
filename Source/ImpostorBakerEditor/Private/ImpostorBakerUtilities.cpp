@@ -18,7 +18,7 @@ FVector FImpostorBakerUtilities::OctahedronToUnitVector(const FVector2D& Octahed
 
 	return FVector(Octahedron.X, Octahedron.Y, Z).GetSafeNormal();
 }
-
+ 
 FVector FImpostorBakerUtilities::HemiOctahedronToUnitVector(const FVector2D& HemiOctahedron)
 {
 	FVector2D Octahedron(HemiOctahedron.X + HemiOctahedron.Y, HemiOctahedron.X - HemiOctahedron.Y);

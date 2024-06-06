@@ -7,6 +7,8 @@
 #include "ImpostorProceduralMeshManager.h"
 #include "ImpostorRenderTargetsManager.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorBakerManager)
+
 void UImpostorBakerManager::AssignData(UImpostorData* InImpostorData,
 									   UWorld* InSceneWorld,
 									   const FImpostorManageComponent& InAddComponentDelegate,

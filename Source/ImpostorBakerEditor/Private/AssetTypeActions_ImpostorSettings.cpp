@@ -1,8 +1,8 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AssetTypeActions_ImpostorSettings.h"
+#include <AssetRegistry/AssetRegistryModule.h>
 #include "ImpostorBakerEditorToolkit.h"
-#include "AssetRegistry/AssetRegistryModule.h"
 
 void FAssetTypeActions_ImpostorSettings::OpenAssetEditor(const TArray<UObject*>& InObjects, TSharedPtr<IToolkitHost> EditWithinLevelEditor)
 {

@@ -1,17 +1,16 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "SImpostorBakerViewport.h"
-
+#include <AdvancedPreviewScene.h>
+#include <ComponentReregisterContext.h>
+#include <Widgets/Layout/SBorder.h>
+#include <Widgets/Text/SRichTextBlock.h>
+#include <BufferVisualizationMenuCommands.h>
+#include <Components/DirectionalLightComponent.h>
 #include "ImpostorData.h"
 #include "ImpostorBakerViewportClient.h"
 #include "Managers/ImpostorBakerManager.h"
 #include "SImpostorBakerViewportToolBar.h"
-
-#include "AdvancedPreviewScene.h"
-#include "ComponentReregisterContext.h"
-#include "Widgets/Text/SRichTextBlock.h"
-#include "BufferVisualizationMenuCommands.h"
-#include "Components/DirectionalLightComponent.h"
 
 void SImpostorBakerViewport::Construct(const FArguments& InArgs)
 {

@@ -1,10 +1,14 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ImpostorLightingManager.h"
+#include <Components/DirectionalLightComponent.h>
+#include <Components/SkyLightComponent.h>
+#include <Engine/World.h>
 #include "ImpostorBakerUtilities.h"
 #include "ImpostorComponentsManager.h"
-#include "Components/SkyLightComponent.h"
-#include "Components/DirectionalLightComponent.h"
+#include "ImpostorData.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorLightingManager)
 
 void UImpostorLightingManager::Initialize()
 {

@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include <CoreMinimal.h>
+#include <EditorViewportClient.h>
 
 class FAdvancedPreviewScene;
 class SImpostorBakerViewport;

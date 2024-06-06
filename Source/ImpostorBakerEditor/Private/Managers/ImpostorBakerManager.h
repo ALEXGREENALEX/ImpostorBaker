@@ -3,11 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
+#include <UObject/Object.h>
 #include "ImpostorBakerManager.generated.h"
 
-class UImpostorData;
 class UImpostorBaseManager;
+class UImpostorData;
+class USkyLightComponent;
 
 DECLARE_DELEGATE_OneParam(FImpostorManageComponent, USceneComponent*);
 DECLARE_DELEGATE_OneParam(FImpostorForceTick, bool);

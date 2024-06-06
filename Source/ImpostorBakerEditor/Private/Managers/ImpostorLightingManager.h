@@ -6,6 +6,9 @@
 #include "ImpostorBaseManager.h"
 #include "ImpostorLightingManager.generated.h"
 
+class UDirectionalLightComponent;
+class USkyLightComponent;
+
 UCLASS()
 class IMPOSTORBAKEREDITOR_API UImpostorLightingManager : public UImpostorBaseManager
 {
