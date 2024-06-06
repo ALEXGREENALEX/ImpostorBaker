@@ -1,6 +1,6 @@
 # ImpostorBaker
 
-Master branch tested on 5.1 - 5.3
+Master branch tested on 5.4
 
 ## Changes
  - Simplified workflow, no separate level, pressing right click on static mesh and selecting `Create Impostor Data` will create new `ImpostorData` asset, which will hold all the impostor data and through which impostor/traditional billboards creation workflow goes. ImpostorData asset is not necessary later, can be removed (useful to rebake the impostor after updating mesh);

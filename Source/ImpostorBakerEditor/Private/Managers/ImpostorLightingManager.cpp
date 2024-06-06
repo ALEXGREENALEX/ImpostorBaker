@@ -34,8 +34,7 @@ void UImpostorLightingManager::Update()
 
 void UImpostorLightingManager::SetupLightVectors()
 {
-	LightVectors = {};
-	LightVectors.Reserve(ImpostorData->LightingGridSize * ImpostorData->LightingGridSize);
+	LightVectors.Empty();
 	LightVectors.SetNumUninitialized(ImpostorData->LightingGridSize * ImpostorData->LightingGridSize);
 
 	for (int32 Y = 0; Y < ImpostorData->LightingGridSize; Y++)

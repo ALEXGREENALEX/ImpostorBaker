@@ -115,8 +115,7 @@ void UImpostorComponentsManager::SetupOctahedronLayout()
 {
 	NumHorizontalFrames = NumVerticalFrames = ImpostorData->FramesCount;
 
-	ViewCaptureVectors = {};
-	ViewCaptureVectors.Reserve(ImpostorData->FramesCount * ImpostorData->FramesCount);
+	ViewCaptureVectors.Empty();
 	ViewCaptureVectors.SetNumUninitialized(ImpostorData->FramesCount * ImpostorData->FramesCount);
 
 	for (int32 Y = 0; Y < ImpostorData->FramesCount; Y++)
@@ -143,8 +142,7 @@ void UImpostorComponentsManager::SetupTraditionalBillboardLayout()
 	NumHorizontalFrames = HorizontalSlices + (ImpostorData->bCaptureTopFrame ? 1 : 0);
 	NumVerticalFrames = 1;
 
-	ViewCaptureVectors = {};
-	ViewCaptureVectors.Reserve(NumHorizontalFrames * NumVerticalFrames);
+	ViewCaptureVectors.Empty();
 	ViewCaptureVectors.SetNumUninitialized(NumHorizontalFrames * NumVerticalFrames);
 
 	const float SliceRadius = FMath::DegreesToRadians((ImpostorData->bGenerateTwoSidedGeometry ? 360.f : 180.f) / (ImpostorData->bGenerateTwoSidedGeometry ? HorizontalSlices : HorizontalSlices));
@@ -195,7 +193,7 @@ void UImpostorComponentsManager::SetupPreviewMeshes()
 		{
 			DestroyComponent(VisualizedMeshes[Index]);
 		}
-		VisualizedMeshes = {};
+		VisualizedMeshes.Empty();
 	}
 	else if (VisualizedMeshes.Num() > NumHorizontalFrames * NumVerticalFrames)
 	{

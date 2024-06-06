@@ -242,12 +242,12 @@ UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstan
 
 void UImpostorProceduralMeshManager::GenerateMeshData()
 {
-	Vertices = {};
-	Normals = {};
-	UVs = {};
-	Triangles = {};
-	Tangents = {};
-	Points = {};
+	Vertices.Empty();
+	Normals.Empty();
+	UVs.Empty();
+	Triangles.Empty();
+	Tangents.Empty();
+	Points.Empty();
 
 	TArray<FVector> CardNormalList = GetNormalCards();
 
@@ -389,7 +389,7 @@ FImpostorTextureData UImpostorProceduralMeshManager::BakeAlphasData(const int32 
 		RTResource->ReadPixels(Colors, ReadPixelFlags, Rectangle);
 		for (int32 ColorIndex = 0; ColorIndex < FMath::Min(Alphas.Num(), Colors.Num()); ColorIndex++)
 		{
-			Alphas[ColorIndex] = float(Colors[ColorIndex].R) / 255.f;
+			Alphas[ColorIndex] = Colors[ColorIndex].R / 255.0f;
 		}
 	}
 

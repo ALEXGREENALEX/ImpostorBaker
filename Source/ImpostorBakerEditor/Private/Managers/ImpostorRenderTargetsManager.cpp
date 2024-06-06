@@ -290,9 +290,7 @@ void UImpostorRenderTargetsManager::BakeRenderTargets()
 	bCapturingFinalColor = false;
 
 	ClearRenderTargets();
-
-	MapsToBake = {};
-	MapsToBake.Reserve(ImpostorData->MapsToRender.Num());
+	MapsToBake.Empty();
 
 	const UImpostorMaterialsManager* MaterialManager = GetManager<UImpostorMaterialsManager>();
 	for (const EImpostorBakeMapType MapType : ImpostorData->MapsToRender)
@@ -343,7 +341,7 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 		UTexture2D* NewTexture = FindObject<UTexture2D>(CreatePackage(*PackageName), *AssetName);
 		if (NewTexture)
 		{
-			RenderTarget->UpdateTexture2D(NewTexture, RenderTarget->GetTextureFormatForConversionToTexture2D(), CTF_Default | CTF_AllowMips, nullptr);
+			RenderTarget->UpdateTexture(NewTexture, static_cast<EConstructTextureFlags>(CTF_Default | CTF_AllowMips));
 		}
 		else
 		{
@@ -401,23 +399,23 @@ void UImpostorRenderTargetsManager::PreparePostProcess(const EImpostorBakeMapTyp
 	case EImpostorBakeMapType::BaseColor:
 	{
 		SceneCaptureComponent2D->CaptureSource = ImpostorData->bUseFinalColorInsteadBaseColor || ImpostorData->ProjectionType == ECameraProjectionMode::Orthographic || bCapturingFinalColor ? SCS_SceneColorHDR : SCS_BaseColor;
-		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array = {};
-		SceneCaptureComponent2D->SceneViewExtensions = {};
+		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array.Empty();
+		SceneCaptureComponent2D->SceneViewExtensions.Empty();
 		Extension = nullptr;
 		break;
 	}
 	case EImpostorBakeMapType::WorldNormal:
 	{
 		SceneCaptureComponent2D->CaptureSource = SCS_Normal;
-		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array = {};
-		SceneCaptureComponent2D->SceneViewExtensions = {};
+		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array.Empty();
+		SceneCaptureComponent2D->SceneViewExtensions.Empty();
 		Extension = nullptr;
 		break;
 	}
 	case EImpostorBakeMapType::CustomLighting:
 	{
 		SceneCaptureComponent2D->CaptureSource = SCS_SceneColorHDR;
-		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array = {};
+		SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array.Empty();
 		Extension = FSceneViewExtensions::NewExtension<FLightingViewExtension>(SceneCaptureComponent2D->GetScene());
 		SceneCaptureComponent2D->SceneViewExtensions.Add(Extension);
 		break;
@@ -437,9 +435,9 @@ void UImpostorRenderTargetsManager::PreparePostProcess(const EImpostorBakeMapTyp
 		}
 		else
 		{
-			SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array = {};
+			SceneCaptureComponent2D->PostProcessSettings.WeightedBlendables.Array.Empty();
 		}
-		SceneCaptureComponent2D->SceneViewExtensions = {};
+		SceneCaptureComponent2D->SceneViewExtensions.Empty();
 		Extension = nullptr;
 		break;
 	}

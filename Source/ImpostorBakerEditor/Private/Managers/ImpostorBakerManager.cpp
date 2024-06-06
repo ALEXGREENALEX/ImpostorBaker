@@ -103,8 +103,8 @@ void UImpostorBakerManager::Cleanup()
 	ImpostorData = nullptr;
 	SceneWorld = nullptr;
 	SkyLight = nullptr;
-	Managers = {};
-	MappedManagers = {};
+	Managers.Empty();
+	MappedManagers.Empty();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

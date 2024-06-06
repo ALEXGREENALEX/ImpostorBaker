@@ -47,9 +47,9 @@ SImpostorBakerViewport::~SImpostorBakerViewport()
 		SystemViewportClient->Viewport = nullptr;
 	}
 
-	Object->OnPropertyInteractiveChange = {};
-	Object->OnPropertyChange = {};
-	Object->OnSettingsChange = {};
+	Object->OnPropertyInteractiveChange.Empty();
+	Object->OnPropertyChange.Empty();
+	Object->OnSettingsChange = nullptr;
 
 	BakerManager->Cleanup();
 	BakerManager = nullptr;
@@ -138,9 +138,7 @@ void SImpostorBakerViewport::PopulateViewportOverlays(const TSharedRef<SOverlay>
 
 bool SImpostorBakerViewport::IsVisible() const
 {
-	return
-		SEditorViewport::IsVisible() ||
-		bIsTickForced;
+	return SEditorViewport::IsVisible() || bIsTickForced;
 }
 
 void SImpostorBakerViewport::BindCommands()

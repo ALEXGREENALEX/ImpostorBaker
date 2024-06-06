@@ -135,10 +135,6 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 	OnSettingsChange.ExecuteIfBound();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 void UImpostorData::AssignMesh(const FAssetData& MeshAssetData)
 {
 	FullSphereMaterial = GetDefault<UImpostorBakerSettings>()->DefaultFullSphereMaterial.LoadSynchronous();
@@ -173,28 +169,21 @@ UMaterialInterface* UImpostorData::GetMaterial() const
 {
 	switch (ImpostorType)
 	{
-	default: check(false);
-	case EImpostorLayoutType::FullSphereView: return FullSphereMaterial;
-	case EImpostorLayoutType::UpperHemisphereOnly: return UpperHemisphereMaterial;
-	case EImpostorLayoutType::TraditionalBillboards: return BillboardMaterial;
+	default:
+		check(false);
+	case EImpostorLayoutType::FullSphereView:
+		return FullSphereMaterial;
+	case EImpostorLayoutType::UpperHemisphereOnly:
+		return UpperHemisphereMaterial;
+	case EImpostorLayoutType::TraditionalBillboards:
+		return BillboardMaterial;
 	}
 }
 
-FString UImpostorData::GetPackage(const FString& AssetName)
+FString UImpostorData::GetPackage(const FString& AssetName) const
 {
-	if (SaveLocation.Path.EndsWith("/"))
-	{
-		return FPaths::Combine(SaveLocation.Path, AssetName);
-	}
-	else
-	{
-		return FPaths::Combine(SaveLocation.Path, "/", AssetName);
-	}
+	return UPackageTools::SanitizePackageName(SaveLocation.Path / AssetName);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 
 void UImpostorData::UpdateFOVDistance()
 {
@@ -212,7 +201,7 @@ void UImpostorData::UpdateFOVDistance()
 
 	if (PerspectiveCameraType == EImpostorPerspectiveCameraType::Distance)
 	{
-		CameraFOV = ((180.f / UE_DOUBLE_PI) * FMath::Atan(Radius / CameraDistance)) * 2.f;
+		CameraFOV = 180.f / UE_DOUBLE_PI * FMath::Atan(Radius / CameraDistance) * 2.0f;
 		return;
 	}
 
@@ -225,15 +214,18 @@ FVector2D UImpostorData::GetMeshOffset() const
 	switch (MeshOffsetType)
 	{
 	case EImpostorMeshOffsetType::MeshOrigin:
-	{
 		if (ReferencedMesh)
 		{
 			Offset = FVector2D(ReferencedMesh->GetBounds().Origin.X, ReferencedMesh->GetBounds().Origin.Y);
 		}
 		break;
-	}
-	case EImpostorMeshOffsetType::CustomOffset: Offset = CustomMeshOffset; break;
-	case EImpostorMeshOffsetType::None: break;
+
+	case EImpostorMeshOffsetType::CustomOffset:
+		Offset = CustomMeshOffset;
+		break;
+
+	case EImpostorMeshOffsetType::None:
+		break;
 	}
 
 	return Offset;

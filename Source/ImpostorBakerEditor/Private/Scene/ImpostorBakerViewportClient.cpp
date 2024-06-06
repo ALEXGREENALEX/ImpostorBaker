@@ -55,8 +55,7 @@ void FImpostorBakerViewportClient::DrawCanvas(FViewport& InViewport, FSceneView&
 	}
 
 	const UImpostorData* Data = ImpostorBakerViewport->GetObjectData();
-	if (!Data ||
-		!Data->bDisplayVertices)
+	if (!Data || !Data->bDisplayVertices)
 	{
 		return;
 	}
