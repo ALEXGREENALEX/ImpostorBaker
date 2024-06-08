@@ -104,7 +104,6 @@ void SImpostorBakerViewport::UpdateCamera() const
 TSharedRef<FEditorViewportClient> SImpostorBakerViewport::MakeEditorViewportClient()
 {
 	SystemViewportClient = MakeShared<FImpostorBakerViewportClient>(*AdvancedPreviewScene.Get(), SharedThis(this));
-	SystemViewportClient->SetRealtime(true);
 	if (Object->ReferencedMesh)
 	{
 		SystemViewportClient->UpdateCamera(Object->ReferencedMesh->GetBounds());
@@ -147,10 +146,6 @@ void SImpostorBakerViewport::BindCommands()
 
 	FBufferVisualizationMenuCommands::Get().BindCommands(*CommandList, Client);
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 
 void SImpostorBakerViewport::OnAddComponent(USceneComponent* SceneComponent) const
 {

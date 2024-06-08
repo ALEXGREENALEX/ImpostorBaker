@@ -33,10 +33,6 @@ void UImpostorProceduralMeshManager::Update()
 	GenerateMeshData();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMaterial) const
 {
 	ProgressSlowTask("Creating impostor static mesh...", true);
@@ -125,10 +121,6 @@ void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMat
 	Mesh->PostEditChange();
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstant* NewMaterial, UObject* TargetPacket, const FString& AssetName) const
 {
 	FMeshDescription MeshDescription = BuildMeshDescription(MeshComponent);
@@ -190,17 +182,18 @@ UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstan
 	NewMesh->ImportVersion = LastVersion;
 
 	NewMesh->Build(false);
-	NewMesh->PostEditChange();
 
 	// Copy bounds from original mesh (prevent Flickering, Culling etc...)
 	const UStaticMesh* ReferencedMesh = IsValid(ImpostorData) ? ImpostorData->ReferencedMesh : nullptr;
 	if (IsValid(ReferencedMesh))
 	{
-		if (const FStaticMeshRenderData* RenderData = ReferencedMesh->GetRenderData())
-		{
-			NewMesh->SetExtendedBounds(RenderData->Bounds);
-		}
+		const FVector BoxExtent = ReferencedMesh->GetBounds().BoxExtent;
+		NewMesh->SetPositiveBoundsExtension(BoxExtent);
+		NewMesh->SetNegativeBoundsExtension(BoxExtent);
+		NewMesh->CalculateExtendedBounds();
 	}
+
+	NewMesh->PostEditChange();
 
 	// Set PreviewMesh for Material Instance
 	if (IsValid(NewMaterial))
@@ -315,11 +308,10 @@ void UImpostorProceduralMeshManager::GenerateMeshData()
 	MeshComponent->ClearMeshSection(0);
 	MeshComponent->CreateMeshSection(0, Vertices, Triangles, Normals, UVs, {}, Tangents, false);
 	MeshComponent->SetMaterial(0, GetManager<UImpostorMaterialsManager>()->ImpostorPreviewMaterial);
-}
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+	// Set big bounds for Procedural mesh (prevent Flickering)
+	MeshComponent->SetBoundsScale(10000.0f);
+}
 
 TArray<FVector> UImpostorProceduralMeshManager::GetNormalCards() const
 {
@@ -372,10 +364,6 @@ FImpostorTextureData UImpostorProceduralMeshManager::BakeAlphasData(const int32 
 
 	return Result;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 
 void UImpostorProceduralMeshManager::CutCorners(TArray<FVector2D>& LocalPoints) const
 {

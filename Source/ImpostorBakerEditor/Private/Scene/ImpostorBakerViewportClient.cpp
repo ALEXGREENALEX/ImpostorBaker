@@ -12,6 +12,8 @@
 #include "Managers/ImpostorBakerManager.h"
 #include "Managers/ImpostorProceduralMeshManager.h"
 
+#define LOCTEXT_NAMESPACE "ImpostorBakerViewportClient"
+
 FImpostorBakerViewportClient::FImpostorBakerViewportClient(FAdvancedPreviewScene& InPreviewScene, const TSharedRef<SImpostorBakerViewport>& InViewport)
 	: FEditorViewportClient(nullptr, &InPreviewScene, InViewport)
 {
@@ -25,12 +27,18 @@ FImpostorBakerViewportClient::FImpostorBakerViewportClient(FAdvancedPreviewScene
 	DrawHelper.PerspectiveGridSize = HALF_WORLD_MAX1;
 	ShowWidget(false);
 
+	SetRealtime(true);
+	if(GEditor->PlayWorld)
+	{
+		AddRealtimeOverride(false, LOCTEXT("ImpostorBakerViewport_RealTimeDisableOnPie", "Disable ImpostorBaker Viewport Realtime for PIE"));
+	}
+
 	FEditorViewportClient::SetViewMode(VMI_Lit);
 
 	EngineShowFlags.Game = 0;
 	EngineShowFlags.ScreenSpaceReflections = 1;
 	EngineShowFlags.AmbientOcclusion = 1;
-	EngineShowFlags.SetSnap(0);
+	EngineShowFlags.SetSnap(false);
 	EngineShowFlags.Grid = false;
 	EngineShowFlags.EnableAdvancedFeatures();
 
@@ -123,7 +131,7 @@ void FImpostorBakerViewportClient::DrawCanvas(FViewport& InViewport, FSceneView&
 			const int32 StringHeight = GEngine->GetSmallFont()->GetStringHeightSize(*Text);
 			FCanvasTextItem TextItem(FVector2D(XPos - StringWidth, YPos - StringHeight), FText::FromString(Text), GEngine->GetSmallFont(), FLinearColor::White);
 			TextItem.EnableShadow(FLinearColor::Black);
-			Canvas.DrawItem(TextItem);	
+			Canvas.DrawItem(TextItem);
 		}
 	}
 }
@@ -155,10 +163,6 @@ UE::Widget::EWidgetMode FImpostorBakerViewportClient::GetWidgetMode() const
 	return UE::Widget::WM_Max;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 void FImpostorBakerViewportClient::UpdateCamera(const FBoxSphereBounds& Bounds)
 {
 	static FRotator CustomOrbitRotation(-33.75f, -0.f, 0.f);
@@ -167,3 +171,5 @@ void FImpostorBakerViewportClient::UpdateCamera(const FBoxSphereBounds& Bounds)
 	bUsingOrbitCamera = true;
 	SetCameraSetup(FVector::ZeroVector, CustomOrbitRotation, CustomOrbitZoom, FVector::ZeroVector, FVector::ZeroVector, FRotator::ZeroRotator);
 }
+
+#undef LOCTEXT_NAMESPACE
