@@ -59,6 +59,13 @@ void UImpostorProceduralMeshManager::SaveMesh(UMaterialInstanceConstant* NewMate
 		NewMesh->MarkPackageDirty();
 
 		FAssetRegistryModule::AssetCreated(NewMesh);
+
+		// Set PreviewMesh for Material Instance
+		if (IsValid(NewMaterial))
+		{
+			NewMaterial->PreviewMesh = NewMesh->GetPathName();
+			NewMaterial->MarkPackageDirty();
+		}
 	}
 }
 
@@ -76,7 +83,7 @@ void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMat
 	FString PackageName = ImpostorData->GetPackageName(AssetName);
 	AssetTools.CreateUniqueAssetName(PackageName, "", PackageName, AssetName);
 
-	const UStaticMesh* NewMesh = CreateMesh(NewMaterial, Mesh, AssetName);
+	UStaticMesh* NewMesh = CreateMesh(NewMaterial, Mesh, AssetName);
 	if (!ensure(NewMesh))
 	{
 		return;
@@ -96,20 +103,28 @@ void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMat
 	}
 
 	Mesh->SetCustomLOD(NewMesh, ImpostorData->TargetLOD, "");
+	NewMesh->ConditionalBeginDestroy();
+	NewMesh = nullptr;
 
-	int32 MaterialIndex = Mesh->GetMaterialIndex(*NewMaterial->GetName());
-	if (MaterialIndex == -1)
+	// Remove Unused MaterialSlots.
+	// Need override index because UStaticMesh::RemoveUnusedMaterialSlots returning if any material used (from end).
+	const int32 ImpostorLODNumSections = Mesh->GetNumSections(ImpostorData->TargetLOD);
+	for (int32 SectionIndex = 0; SectionIndex < ImpostorLODNumSections; SectionIndex++)
+	{
+		FMeshSectionInfo SectionInfo = Mesh->GetSectionInfoMap().Get(ImpostorData->TargetLOD, SectionIndex);
+		SectionInfo.MaterialIndex = 0; // Temporal override Material index to first
+		Mesh->GetSectionInfoMap().Set(ImpostorData->TargetLOD, SectionIndex, SectionInfo);
+	}
+	UStaticMesh::RemoveUnusedMaterialSlots(Mesh);
+
+	int32 MaterialIndex = Mesh->GetStaticMaterials().Find(NewMaterial);
+	if (MaterialIndex == INDEX_NONE)
 	{
 		const FName SlotName = Mesh->AddMaterial(NewMaterial);
 		MaterialIndex = Mesh->GetMaterialIndex(SlotName);
 	}
-	else
-	{
-		Mesh->SetMaterial(MaterialIndex, NewMaterial);
-	}
 
-	const int32 NumSections = Mesh->GetNumSections(ImpostorData->TargetLOD);
-	for (int32 SectionIndex = 0; SectionIndex < NumSections; SectionIndex++)
+	for (int32 SectionIndex = 0; SectionIndex < ImpostorLODNumSections; SectionIndex++)
 	{
 		FMeshSectionInfo SectionInfo = Mesh->GetSectionInfoMap().Get(ImpostorData->TargetLOD, SectionIndex);
 		SectionInfo.bCastShadow = ImpostorData->bMeshCastShadow;
@@ -119,6 +134,7 @@ void UImpostorProceduralMeshManager::UpdateLOD(UMaterialInstanceConstant* NewMat
 
 	Mesh->Build(false);
 	Mesh->PostEditChange();
+	Mesh->MarkPackageDirty();
 }
 
 UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstant* NewMaterial, UObject* TargetPacket, const FString& AssetName) const
@@ -162,7 +178,7 @@ UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstan
 		NewBodySetup->CreatePhysicsMeshes();
 	}
 
-	if (IsValid(NewMaterial))
+	if (IsValid(NewMaterial)) // Can be null for LODs export
 	{
 		const int32 NumSections = MeshComponent->GetNumSections();
 		for (int32 SectionIdx = 0; SectionIdx < NumSections; SectionIdx++)
@@ -194,13 +210,6 @@ UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstan
 	}
 
 	NewMesh->PostEditChange();
-
-	// Set PreviewMesh for Material Instance
-	if (IsValid(NewMaterial))
-	{
-		NewMaterial->PreviewMesh = NewMesh->GetPathName();
-		NewMaterial->MarkPackageDirty();
-	}
 
 	return NewMesh;
 }

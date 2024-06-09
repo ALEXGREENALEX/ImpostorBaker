@@ -141,7 +141,7 @@ void UImpostorComponentsManager::SetupTraditionalBillboardLayout()
 	ViewCaptureVectors.Empty();
 	ViewCaptureVectors.SetNumUninitialized(NumHorizontalFrames * NumVerticalFrames);
 
-	const float SliceRadius = FMath::DegreesToRadians((ImpostorData->bGenerateTwoSidedGeometry ? 360.f : 180.f) / (ImpostorData->bGenerateTwoSidedGeometry ? HorizontalSlices : HorizontalSlices));
+	const float SliceRadius = FMath::DegreesToRadians((ImpostorData->bGenerateTwoSidedGeometry ? 360.f : 180.f) / HorizontalSlices);
 	for (int32 Index = 0; Index < HorizontalSlices; Index++)
 	{
 		ViewCaptureVectors[Index] = FVector(FMath::Cos(SliceRadius * Index), FMath::Sin(SliceRadius * Index), 0.f);

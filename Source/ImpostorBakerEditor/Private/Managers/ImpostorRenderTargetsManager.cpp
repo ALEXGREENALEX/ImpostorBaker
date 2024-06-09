@@ -458,8 +458,7 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 {
 	SceneCaptureComponent2D->TextureTarget = CurrentMap == EImpostorBakeMapType::BaseColor && !bCapturingFinalColor ? SceneCaptureSRGBMip : SceneCaptureMipChain[0];
 	FString MapTypeString = GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[CurrentMap].ToString();
-	if (bCapturingFinalColor &&
-		CurrentMap == EImpostorBakeMapType::BaseColor)
+	if (bCapturingFinalColor && CurrentMap == EImpostorBakeMapType::BaseColor)
 	{
 		MapTypeString = "Final Color (Opacity)";
 		ResampleRenderTarget(TargetMaps[CurrentMap], BaseColorScratchRenderTarget);
@@ -490,11 +489,9 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 		SceneCaptureComponent2D->UpdateSceneCaptureContents(SceneWorld->Scene);
 
 		// Lower mips are necessary for distance field alpha and mesh cutouts
-		if (ImpostorData->bUseDistanceFieldAlpha ||
-			ImpostorData->bUseMeshCutout)
+		if (ImpostorData->bUseDistanceFieldAlpha || ImpostorData->bUseMeshCutout)
 		{
-			if (CurrentMap == EImpostorBakeMapType::BaseColor &&
-				bCapturingFinalColor)
+			if (CurrentMap == EImpostorBakeMapType::BaseColor && bCapturingFinalColor)
 			{
 				for (int32 MipIndex = 1; MipIndex < SceneCaptureMipChain.Num(); MipIndex++)
 				{
