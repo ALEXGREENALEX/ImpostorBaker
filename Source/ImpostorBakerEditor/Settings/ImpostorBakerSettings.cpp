@@ -4,7 +4,7 @@
 
 UImpostorBakerSettings::UImpostorBakerSettings()
 {
-	static FString Materials = TEXT("/ImpostorBaker/ImpostorBaker/Materials/");
+	static FString Materials = TEXT("/ImpostorBaker/Materials/");
 	static FString Generation = Materials + TEXT("Generation/");
 
 	BufferPostProcessMaterials = {
