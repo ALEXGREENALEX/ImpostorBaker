@@ -9,6 +9,7 @@ Updated to UE 5.4, fixed port bugs (now works like original version).
  - Updated traditional billboards functionality;
 
 Video (not actual, some bugs are fixed)
+
 https://github.com/Erlandys/ImpostorBaker/assets/6483175/07991163-5938-453d-99e5-23408317c540
 
 
