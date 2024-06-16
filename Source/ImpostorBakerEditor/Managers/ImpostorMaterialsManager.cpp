@@ -263,15 +263,31 @@ UMaterialInstanceConstant* UImpostorMaterialsManager::SaveMaterial(const TMap<EI
 	NewMaterial->SetScalarParameterValueEditorOnly(Settings->ImpostorPreviewMeshRadius, ComponentsManager->ObjectRadius * 2.f);
 	NewMaterial->SetVectorParameterValueEditorOnly(Settings->ImpostorPreviewPivotOffset, FLinearColor(ComponentsManager->OffsetVector));
 
-	// Bind Textures
-	for (const auto& It : Textures)
+	// Cache Material Texture parameters Names
+	TMap<FMaterialParameterInfo, FMaterialParameterMetadata> TextureParameters;
+	NewMaterial->GetAllParametersOfType(EMaterialParameterType::Texture, TextureParameters);
+	TSet<FMaterialParameterInfo> TextureParameterNames;
+	for (const auto& [MaterialParameterInfo, MaterialParameterMetadata] : TextureParameters)
 	{
-		if (!ensure(Settings->ImpostorPreviewMapNames.Contains(It.Key)))
+		if (!TextureParameterNames.Contains(MaterialParameterInfo.Name))
+		{
+			TextureParameterNames.Add(MaterialParameterInfo.Name);
+		}
+	}
+
+	// Bind Textures
+	for (const auto& [ImpostorBakeMapType, Texture] : Textures)
+	{
+		if (!ensure(Settings->ImpostorPreviewMapNames.Contains(ImpostorBakeMapType)))
 		{
 			continue;
 		}
 
-		NewMaterial->SetTextureParameterValueEditorOnly(Settings->ImpostorPreviewMapNames[It.Key], It.Value);
+		const FName& ParameterName = Settings->ImpostorPreviewMapNames[ImpostorBakeMapType];
+		if (TextureParameterNames.Contains(ParameterName)) // Set only if Parameter exists (prevent dead references in materials)
+		{
+			NewMaterial->SetTextureParameterValueEditorOnly(ParameterName, Texture);
+		}
 	}
 
 	NewMaterial->UpdateCachedData();
