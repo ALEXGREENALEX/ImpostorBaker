@@ -20,6 +20,8 @@ public:
 
 	void SetupLightVectors();
 
+	void SetLightsVisibility(bool bVisible);
+
 private:
 	void DisplayCustomLighting();
 

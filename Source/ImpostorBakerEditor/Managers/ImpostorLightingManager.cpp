@@ -42,6 +42,22 @@ void UImpostorLightingManager::SetupLightVectors()
 	DisplayCustomLighting();
 }
 
+void UImpostorLightingManager::SetLightsVisibility(bool bVisible)
+{
+	for (UDirectionalLightComponent* DirectionalLight : Lights)
+	{
+		if (IsValid(DirectionalLight))
+		{
+			DirectionalLight->SetVisibility(bVisible);
+		}
+	}
+
+	if (IsValid(SkyLightComponent))
+	{
+		SkyLightComponent->SetVisibility(bVisible);
+	}
+}
+
 void UImpostorLightingManager::DisplayCustomLighting()
 {
 	int32 Index = 0;

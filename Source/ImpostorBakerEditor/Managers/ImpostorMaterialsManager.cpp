@@ -380,15 +380,11 @@ void UImpostorMaterialsManager::UpdateBaseColorCustomLightingMaterial() const
 	{
 		BaseColorCustomLightingMaterial->SetTextureParameterValue(FName("CustomLighting"), RenderTarget);
 	}
-	else
-	{
-		BaseColorCustomLightingMaterial->SetTextureParameterValue(FName("CustomLighting"), LoadObject<UTexture2D>(nullptr, TEXT("/Engine/ArtTools/RenderToTexture/Textures/T_EV_BlankWhite_01.T_EV_BlankWhite_01")));
-	}
 
-	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("CustomLightingPower"), ImpostorData->CustomLightingPower);
-	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("CustomLightingBaseColorOpacity"), ImpostorData->CustomLightingOpacity);
-	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("Desaturation"), ImpostorData->CustomLightingDesaturation);
-	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("CustomLightingMultiplier"), ImpostorData->CustomLightingMultiplier);
+	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("LightingPower"), ImpostorData->CustomLightingPower);
+	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("LightingOpacity"), ImpostorData->CustomLightingOpacity);
+	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("LightingMultiplier"), ImpostorData->CustomLightingMultiplier);
+	BaseColorCustomLightingMaterial->SetScalarParameterValue(FName("LightingSaturation"), ImpostorData->CustomLightingSaturation);
 }
 
 void UImpostorMaterialsManager::UpdateCombinedNormalsDepthMaterial() const
@@ -401,10 +397,6 @@ void UImpostorMaterialsManager::UpdateCombinedNormalsDepthMaterial() const
 	if (UTextureRenderTarget2D* RenderTarget = RenderTargetsManager->TargetMaps.FindRef(EImpostorBakeMapType::Depth))
 	{
 		CombinedNormalsDepthMaterial->SetTextureParameterValue(FName("Depth"), RenderTarget);
-	}
-	else
-	{
-		CombinedNormalsDepthMaterial->SetTextureParameterValue(FName("Depth"), LoadObject<UTexture2D>(nullptr, TEXT("/Engine/ArtTools/RenderToTexture/Textures/127grey.127grey")));
 	}
 }
 

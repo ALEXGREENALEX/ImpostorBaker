@@ -6,31 +6,9 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorData)
 
-void UImpostorData::PreEditChange(FProperty* PropertyAboutToChange)
+FPrimaryAssetId UImpostorData::GetPrimaryAssetId() const
 {
-	Super::PreEditChange(PropertyAboutToChange);
-
-	if (PropertyAboutToChange->GetFName() == GET_MEMBER_NAME_CHECKED(UImpostorData, MapsToRender))
-	{
-		bNeedUpdateCustomLightingBool = false;
-
-		if (bCombineLightingAndColor)
-		{
-			if (MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
-				MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
-			{
-				bNeedUpdateCustomLightingBool = true;
-			}
-		}
-		else
-		{
-			if (!MapsToRender.Contains(EImpostorBakeMapType::BaseColor) ||
-				!MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
-			{
-				bNeedUpdateCustomLightingBool = true;
-			}
-		}
-	}
+	return FPrimaryAssetId(PrimaryAssetType, GetFName());
 }
 
 void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -74,27 +52,6 @@ void UImpostorData::PostEditChangeProperty(FPropertyChangedEvent& PropertyChange
 				{
 					MapsToRender.Add(Enum);
 					break;
-				}
-			}
-		}
-
-		if (bNeedUpdateCustomLightingBool)
-		{
-			bNeedUpdateCustomLightingBool = false;
-			if (bCombineLightingAndColor)
-			{
-				if (!MapsToRender.Contains(EImpostorBakeMapType::BaseColor) ||
-					!MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
-				{
-					bCombineLightingAndColor = false;
-				}
-			}
-			else
-			{
-				if (MapsToRender.Contains(EImpostorBakeMapType::BaseColor) &&
-					MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
-				{
-					bCombineLightingAndColor = true;
 				}
 			}
 		}

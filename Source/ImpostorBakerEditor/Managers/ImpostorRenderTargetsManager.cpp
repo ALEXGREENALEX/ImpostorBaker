@@ -9,10 +9,10 @@
 #include <Materials/MaterialInstanceDynamic.h>
 #include <UObject/Package.h>
 #include "ImpostorComponentsManager.h"
+#include "ImpostorLightingManager.h"
 #include "ImpostorMaterialsManager.h"
 #include "ImpostorProceduralMeshManager.h"
 #include "Settings/ImpostorBakerSettings.h"
-#include "Utilities/ImpostorBakerUtilities.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorRenderTargetsManager)
 
@@ -24,6 +24,33 @@ void UImpostorRenderTargetsManager::Initialize()
 
 void UImpostorRenderTargetsManager::Update()
 {
+	TArray<EImpostorBakeMapType>& MapsToRender = ImpostorData->MapsToRender;
+	if (ImpostorData->bCombineLightingAndColor)
+	{
+		if (!MapsToRender.Contains(EImpostorBakeMapType::BaseColor))
+		{
+			MapsToRender.Add(EImpostorBakeMapType::BaseColor);
+		}
+
+		if (!MapsToRender.Contains(EImpostorBakeMapType::CustomLighting))
+		{
+			MapsToRender.Add(EImpostorBakeMapType::CustomLighting);
+		}
+	}
+
+	if (ImpostorData->bCombineNormalAndDepth)
+	{
+		if (!MapsToRender.Contains(EImpostorBakeMapType::Depth))
+		{
+			MapsToRender.Add(EImpostorBakeMapType::Depth);
+		}
+
+		if (!MapsToRender.Contains(EImpostorBakeMapType::Normal))
+		{
+			ImpostorData->MapsToRender.Add(EImpostorBakeMapType::Normal);
+		}
+	}
+
 	AllocateRenderTargets();
 	CreateRenderTargetMips();
 	CreateAlphasScratchRenderTargets();
@@ -292,8 +319,7 @@ void UImpostorRenderTargetsManager::BakeRenderTargets()
 	const UImpostorMaterialsManager* MaterialManager = GetManager<UImpostorMaterialsManager>();
 	for (const EImpostorBakeMapType MapType : ImpostorData->MapsToRender)
 	{
-		if (TargetMaps.Contains(MapType) &&
-			MaterialManager->HasRenderTypeMaterial(MapType))
+		if (TargetMaps.Contains(MapType) && MaterialManager->HasRenderTypeMaterial(MapType))
 		{
 			MapsToBake.Add(MapType);
 		}
@@ -365,11 +391,11 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 		{
 			NewTexture->MipGenSettings = TMGS_FromTextureGroup;
 			NewTexture->SRGB = TargetMap == EImpostorBakeMapType::BaseColor;
+			NewTexture->CompressionSettings = TC_BC7;
 
 			if (TargetMap == EImpostorBakeMapType::Normal)
 			{
-				if (!ImpostorData->bCombineNormalAndDepth ||
-					!ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
+				if (!ImpostorData->bCombineNormalAndDepth || !ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
 				{
 					NewTexture->LODGroup = TEXTUREGROUP_WorldNormalMap;
 					NewTexture->CompressionSettings = TC_Normalmap;
@@ -440,6 +466,26 @@ void UImpostorRenderTargetsManager::PreparePostProcess(const EImpostorBakeMapTyp
 
 void UImpostorRenderTargetsManager::CaptureImposterGrid()
 {
+	// Disable unnecessary Lights when baking some maps (increase baking speed)
+	UImpostorLightingManager* LightingManager = GetManager<UImpostorLightingManager>();
+	if (IsValid(LightingManager))
+	{
+		switch (CurrentMap)
+		{
+		case EImpostorBakeMapType::BaseColor:
+			LightingManager->SetLightsVisibility(ImpostorData->bUseFinalColorInsteadBaseColor);
+			break;
+
+		case EImpostorBakeMapType::CustomLighting:
+			LightingManager->SetLightsVisibility(true);
+			break;
+
+		default:
+			LightingManager->SetLightsVisibility(false);
+			break;
+		}
+	}
+
 	SceneCaptureComponent2D->TextureTarget = CurrentMap == EImpostorBakeMapType::BaseColor && !bCapturingFinalColor ? SceneCaptureSRGBMip : SceneCaptureMipChain[0];
 	FString MapTypeString = GetDefault<UImpostorBakerSettings>()->ImpostorPreviewMapNames[CurrentMap].ToString();
 	if (bCapturingFinalColor && CurrentMap == EImpostorBakeMapType::BaseColor)
@@ -539,6 +585,13 @@ void UImpostorRenderTargetsManager::FinalizeBaking()
 
 void UImpostorRenderTargetsManager::CustomCompositing() const
 {
+	// Enable disabled Lights when baking some maps
+	UImpostorLightingManager* LightingManager = GetManager<UImpostorLightingManager>();
+	if (IsValid(LightingManager))
+	{
+		LightingManager->SetLightsVisibility(true);
+	}
+
 	if (ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::BaseColor))
 	{
 		UKismetRenderingLibrary::ClearRenderTarget2D(SceneWorld, ScratchRenderTarget, FLinearColor::Black);

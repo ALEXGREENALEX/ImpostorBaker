@@ -53,15 +53,8 @@ class UImpostorData : public UObject
 
 public:
 	//~ Begin UObject Interface
-	virtual bool IsEditorOnly() const override
-	{
-		return true;
-	}
-	virtual FPrimaryAssetId GetPrimaryAssetId() const override
-	{
-		return FPrimaryAssetId(PrimaryAssetType, GetFName());
-	}
-	virtual void PreEditChange(FProperty* PropertyAboutToChange) override;
+	virtual bool IsEditorOnly() const override { return true; }
+	virtual FPrimaryAssetId GetPrimaryAssetId() const override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	//~ End UObject Interface
 
@@ -70,6 +63,8 @@ public:
 	UMaterialInterface* GetMaterial() const;
 
 	FString GetPackageName(const FString& AssetName) const;
+
+	FVector2D GetMeshOffset() const;
 
 private:
 	void UpdateFOVDistance();
@@ -220,7 +215,7 @@ public:
 	float Dither = 1.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Material")
-	bool bEnablePixelDepthOffset = true;
+	bool bEnablePixelDepthOffset = false;
 
 	// Values bigger 0 allow to hide wrong shadows on mesh.
 	UPROPERTY(EditAnywhere, Category = "Material")
@@ -255,18 +250,20 @@ public:
 	// Lower power values produces custom lighting as 1, so it doesn't change the base color;
 	// Power as 1 uses original custom lighting, so it affects the brightness of base color.
 	UPROPERTY(EditAnywhere, Category = "Custom Lighting", Meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0.001"))
-	float CustomLightingPower = 0.001f;
+	float CustomLightingPower = 1.0f;
 
 	// 0 - custom lighting won't affect base color, 1 - fully affects base color
 	UPROPERTY(EditAnywhere, Category = "Custom Lighting", Meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0", ClampMax = "1"))
-	float CustomLightingOpacity = 0.0f;
+	float CustomLightingOpacity = 1.0f;
 
 	// Multiplies custom lighting value (allows to brighten/darken the object)
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting", Meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides))
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting", Meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0"))
 	float CustomLightingMultiplier = 1.0f;
 
-	UPROPERTY(EditAnywhere, Category = "Custom Lighting", Meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides))
-	float CustomLightingDesaturation = 0.5f;
+	// Saturate custom lighting value.
+	UPROPERTY(EditAnywhere, Category = "Custom Lighting", Meta = (EditCondition = "bCombineLightingAndColor", EditConditionHides, ClampMin = "0", ClampMax = "1"))
+	float CustomLightingSaturation = 1.0f;
+
 
 	// Orthographic is the most accurate, but some shader effects require a perspective view. The Camera Distance should be set as far back as it can without introducing too many Z fighting artifacts.
 	UPROPERTY(EditAnywhere, Category = "Projection")
@@ -318,10 +315,4 @@ public:
 	// Will display vertices with their data in viewport
 	UPROPERTY(VisibleAnywhere, Category = "Advanced", AdvancedDisplay)
 	bool bDisplayVertices = false;
-
-private:
-	bool bNeedUpdateCustomLightingBool = false;
-
-public:
-	FVector2D GetMeshOffset() const;
 };
