@@ -387,19 +387,16 @@ TMap<EImpostorBakeMapType, UTexture2D*> UImpostorRenderTargetsManager::SaveTextu
 
 		NewTexture->PreEditChange(nullptr);
 
-		if (bCreatingNewTexture)
-		{
-			NewTexture->MipGenSettings = TMGS_FromTextureGroup;
-			NewTexture->SRGB = TargetMap == EImpostorBakeMapType::BaseColor;
-			NewTexture->CompressionSettings = TC_BC7;
+		NewTexture->MipGenSettings = TMGS_FromTextureGroup;
+		NewTexture->SRGB = TargetMap == EImpostorBakeMapType::BaseColor;
+		NewTexture->CompressionSettings = TC_BC7;
 
-			if (TargetMap == EImpostorBakeMapType::Normal)
+		if (TargetMap == EImpostorBakeMapType::Normal)
+		{
+			if (!ImpostorData->bCombineNormalAndDepth || !ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
 			{
-				if (!ImpostorData->bCombineNormalAndDepth || !ImpostorData->MapsToRender.Contains(EImpostorBakeMapType::Depth))
-				{
-					NewTexture->LODGroup = TEXTUREGROUP_WorldNormalMap;
-					NewTexture->CompressionSettings = TC_Normalmap;
-				}
+				NewTexture->LODGroup = TEXTUREGROUP_WorldNormalMap;
+				NewTexture->CompressionSettings = TC_Normalmap;
 			}
 		}
 
