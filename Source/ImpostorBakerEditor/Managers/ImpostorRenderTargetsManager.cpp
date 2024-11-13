@@ -260,7 +260,7 @@ void UImpostorRenderTargetsManager::SceneCaptureSetup() const
 	ShowFlagsSettings.Add({"Fog", false});
 	ShowFlagsSettings.Add({"AtmosphericFog", false});
 
-	SceneCaptureComponent2D->ShowFlagSettings = ShowFlagsSettings;
+	SceneCaptureComponent2D->SetShowFlagSettings(ShowFlagsSettings);
 
 	SceneCaptureComponent2D->bCaptureEveryFrame = true;
 	SceneCaptureComponent2D->CaptureSource = SCS_FinalColorHDR;
