@@ -4,7 +4,7 @@
 	"VersionName": "1.0",
 	"FriendlyName": "ImpostorBaker",
 	"Description": "Generates a variety of Impostors for use as distant mesh LODs.",
-	"Category": "Other",
+	"Category": "Editor",
 	"CreatedBy": "Ryan Brucks, updated by Erlandas Barauskas",
 	"CreatedByURL": "",
 	"DocsURL": "",
