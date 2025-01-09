@@ -1,4 +1,5 @@
 ﻿#include "ImpostorBakerEditorToolkit.h"
+#include <Modules/ModuleManager.h>
 #include <PropertyEditorModule.h>
 #include <Widgets/Docking/SDockTab.h>
 #include "ImpostorData/ImpostorData.h"
