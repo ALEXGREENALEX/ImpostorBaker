@@ -193,8 +193,7 @@ UStaticMesh* UImpostorProceduralMeshManager::CreateMesh(UMaterialInstanceConstan
 		NewMesh->GetSectionInfoMap().Set(0, SectionIndex, SectionInfo);
 	}
 
-	NewMesh->ImportVersion = LastVersion;
-
+	NewMesh->SetImportVersion(LastVersion);
 	NewMesh->Build(false);
 
 	// Copy bounds from original mesh (prevent Flickering, Culling etc...)

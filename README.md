@@ -1,6 +1,7 @@
 # ImpostorBaker
 
-Updated to UE 5.4, fixed port bugs (now works like original version).
+Updated to UE 5.7, fixed port bugs (now works like original version).
+P.S. Starting from UE 5.5 Epics improved built-in ImpostorBaker plugin, it's looks like real solution now with official Epics support.
 
 ## Changes
  - Simplified workflow, no separate level, pressing right click on static mesh and selecting `Create Impostor Data` will create new `ImpostorData` asset, which will hold all the impostor data and through which impostor/traditional billboards creation workflow goes. ImpostorData asset is not necessary later, can be removed (useful to rebake the impostor after updating mesh);
