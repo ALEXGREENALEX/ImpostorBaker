@@ -517,6 +517,7 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 
 		TUniquePtr<ISceneRenderBuilder> SceneRenderBuilder = ISceneRenderBuilder::Create(SceneWorld->Scene);
 		SceneCaptureComponent2D->UpdateSceneCaptureContents(SceneWorld->Scene, *SceneRenderBuilder);
+		SceneRenderBuilder->Execute();
 
 		// Lower mips are necessary for distance field alpha and mesh cutouts
 		if (ImpostorData->bUseDistanceFieldAlpha || ImpostorData->bUseMeshCutout)
