@@ -60,7 +60,7 @@ public:
 protected:
 	//~ Begin SEditorViewport Interface
 	virtual TSharedRef<FEditorViewportClient> MakeEditorViewportClient() override;
-	virtual TSharedPtr<SWidget> MakeViewportToolbar() override;
+	virtual TSharedPtr<SWidget> BuildViewportToolbar() override;
 	virtual void PopulateViewportOverlays(TSharedRef<SOverlay> Overlay) override;
 	virtual bool IsVisible() const override;
 	virtual void BindCommands() override;

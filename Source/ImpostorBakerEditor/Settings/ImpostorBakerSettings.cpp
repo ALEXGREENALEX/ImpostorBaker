@@ -4,7 +4,7 @@
 
 UImpostorBakerSettings::UImpostorBakerSettings()
 {
-	static FString Materials = TEXT("/ImpostorBaker/Materials/");
+	static FString Materials = TEXT("/ImpostorBakerPlugin/Materials/");
 	static FString Generation = Materials + TEXT("Generation/");
 
 	BufferPostProcessMaterials = {
@@ -18,16 +18,16 @@ UImpostorBakerSettings::UImpostorBakerSettings()
 		{EImpostorBakeMapType::Depth,		TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Generation + "M_PP_ImpostorBake_Depth.M_PP_ImpostorBake_Depth"))},
 	};
 
-	DefaultFullSphereMaterial			= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Materials + "MI_Impostor_Sphere.MI_Impostor_Sphere"));
-	DefaultUpperHemisphereMaterial		= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Materials + "MI_Impostor_Hemisphere.MI_Impostor_Hemisphere"));
-	DefaultBillboardMaterial			= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Materials + "M_Billboard.M_Billboard"));
-	DefaultBillboardTwoSidedMaterial	= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Materials + "MI_Billboard_TwoSided.MI_Billboard_TwoSided"));
-	BaseColorCustomLightingMaterial		= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Generation + "M_ImpostorBake_CombineBaseColorCustomLighting.M_ImpostorBake_CombineBaseColorCustomLighting"));
-	CombinedNormalsDepthMaterial		= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Generation + "M_ImpostorBake_CombineNormalsDepth.M_ImpostorBake_CombineNormalsDepth"));
-	SampleFrameMaterial					= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Generation + "M_ImpostorBake_SampleFrame.M_ImpostorBake_SampleFrame"));
-	AddAlphasMaterial					= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Generation + "M_ImpostorBake_AddAlpha.M_ImpostorBake_AddAlpha"));
-	ResampleMaterial					= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Generation + "M_ImpostorBake_ResampleRT.M_ImpostorBake_ResampleRT"));
-	AddAlphaFromFinalColor				= TSoftObjectPtr<UMaterialInterface>(FSoftObjectPath(Generation + "M_ImpostorBake_AddAlphaFromFinalColor.M_ImpostorBake_AddAlphaFromFinalColor"));
+	DefaultFullSphereMaterial			= FSoftObjectPath(Materials + "MI_Impostor_Sphere.MI_Impostor_Sphere");
+	DefaultUpperHemisphereMaterial		= FSoftObjectPath(Materials + "MI_Impostor_Hemisphere.MI_Impostor_Hemisphere");
+	DefaultBillboardMaterial			= FSoftObjectPath(Materials + "M_Billboard.M_Billboard");
+	DefaultBillboardTwoSidedMaterial	= FSoftObjectPath(Materials + "MI_Billboard_TwoSided.MI_Billboard_TwoSided");
+	BaseColorCustomLightingMaterial		= FSoftObjectPath(Generation + "M_ImpostorBake_CombineBaseColorCustomLighting.M_ImpostorBake_CombineBaseColorCustomLighting");
+	CombinedNormalsDepthMaterial		= FSoftObjectPath(Generation + "M_ImpostorBake_CombineNormalsDepth.M_ImpostorBake_CombineNormalsDepth");
+	SampleFrameMaterial					= FSoftObjectPath(Generation + "M_ImpostorBake_SampleFrame.M_ImpostorBake_SampleFrame");
+	AddAlphasMaterial					= FSoftObjectPath(Generation + "M_ImpostorBake_AddAlpha.M_ImpostorBake_AddAlpha");
+	ResampleMaterial					= FSoftObjectPath(Generation + "M_ImpostorBake_ResampleRT.M_ImpostorBake_ResampleRT");
+	AddAlphaFromFinalColor				= FSoftObjectPath(Generation + "M_ImpostorBake_AddAlphaFromFinalColor.M_ImpostorBake_AddAlphaFromFinalColor");
 
 	ImpostorPreviewMapNames = {
 		{EImpostorBakeMapType::BaseColor,		TEXT("BaseColor")},

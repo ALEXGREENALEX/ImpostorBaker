@@ -98,7 +98,7 @@ TSharedRef<FEditorViewportClient> SImpostorBakerViewport::MakeEditorViewportClie
 	return SystemViewportClient.ToSharedRef();
 }
 
-TSharedPtr<SWidget> SImpostorBakerViewport::MakeViewportToolbar()
+TSharedPtr<SWidget> SImpostorBakerViewport::BuildViewportToolbar()
 {
 	return SNew(SImpostorBakerViewportToolBar, SharedThis(this));
 }
