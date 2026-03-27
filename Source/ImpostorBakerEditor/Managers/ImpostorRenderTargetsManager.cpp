@@ -12,6 +12,7 @@
 #include "ImpostorLightingManager.h"
 #include "ImpostorMaterialsManager.h"
 #include "ImpostorProceduralMeshManager.h"
+#include "SceneRenderBuilderInterface.h"
 #include "Settings/ImpostorBakerSettings.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ImpostorRenderTargetsManager)
@@ -513,7 +514,9 @@ void UImpostorRenderTargetsManager::CaptureImposterGrid()
 		GetManager<UImpostorMaterialsManager>()->UpdateDepthMaterialData(Vector);
 
 		SceneWorld->SendAllEndOfFrameUpdates();
-		SceneCaptureComponent2D->UpdateSceneCaptureContents(SceneWorld->Scene);
+
+		TUniquePtr<ISceneRenderBuilder> SceneRenderBuilder = ISceneRenderBuilder::Create(SceneWorld->Scene);
+		SceneCaptureComponent2D->UpdateSceneCaptureContents(SceneWorld->Scene, *SceneRenderBuilder);
 
 		// Lower mips are necessary for distance field alpha and mesh cutouts
 		if (ImpostorData->bUseDistanceFieldAlpha || ImpostorData->bUseMeshCutout)
